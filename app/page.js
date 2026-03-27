@@ -126,35 +126,11 @@ function SelectedWorkSection() {
         <div className="group relative flex flex-col bg-neutral-900/40 border border-white/5 rounded-2xl overflow-hidden hover:bg-neutral-900/60 transition-colors duration-500">
           <div className="h-[400px] w-full relative bg-[#0c0c0c] flex items-center justify-center p-8 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a0a] z-10" />
-            <div className="w-full h-full border border-white/10 rounded-xl flex flex-col bg-[#111] shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500 ease-out">
-              <div className="h-14 border-b border-white/10 flex items-center px-6 gap-6">
-                <div className="w-32 h-4 rounded-md bg-white/10" />
-                <div className="hidden md:flex gap-4 ml-auto">
-                  <div className="w-16 h-4 rounded-md bg-white/5" />
-                  <div className="w-16 h-4 rounded-md bg-white/5" />
-                </div>
-              </div>
-              <div className="flex-1 flex p-6 gap-6">
-                <div className="w-48 h-full rounded-lg bg-white/5 hidden md:block" />
-                <div className="flex-1 h-full flex flex-col gap-6">
-                  <div className="h-40 rounded-lg bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/20 relative overflow-hidden">
-                    <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-[#111] to-transparent" />
-                    <svg
-                      className="absolute bottom-4 left-0 w-full h-24 stroke-cyan-500/30"
-                      fill="none"
-                      viewBox="0 0 100 100"
-                      preserveAspectRatio="none"
-                    >
-                      <path d="M0,50 Q25,20 50,50 T100,50" strokeWidth="2" />
-                    </svg>
-                  </div>
-                  <div className="flex gap-6 h-full">
-                    <div className="flex-1 rounded-lg bg-white/5" />
-                    <div className="flex-1 rounded-lg bg-white/5" />
-                  </div>
-                </div>
-              </div>
-            </div>
+            <img
+              src="/images/nexus-analytics.svg"
+              alt="Nexus Analytics dashboard preview"
+              className="w-full h-full object-cover border border-white/10 rounded-xl shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500 ease-out"
+            />
           </div>
           <div className="p-8 relative z-20 bg-[#0a0a0a]">
             <div className="flex items-center gap-3 mb-4">
@@ -183,20 +159,11 @@ function SelectedWorkSection() {
         <div className="group relative flex flex-col bg-neutral-900/40 border border-white/5 rounded-2xl overflow-hidden hover:bg-neutral-900/60 transition-colors duration-500">
           <div className="h-[400px] w-full relative bg-[#0c0c0c] flex items-center justify-center p-8 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a0a] z-10" />
-            <div className="w-[280px] h-[560px] border-[6px] border-neutral-800 rounded-[2.5rem] bg-[#111] shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500 ease-out flex flex-col overflow-hidden relative mt-32">
-              <div className="absolute top-0 w-full h-6 flex justify-center mt-2">
-                <div className="w-24 h-6 bg-neutral-800 rounded-full" />
-              </div>
-              <div className="mt-16 px-6 flex flex-col gap-4">
-                <div className="w-32 h-8 rounded-md bg-white/10 mb-4" />
-                <div className="w-full h-32 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/5" />
-                <div className="flex gap-4">
-                  <div className="flex-1 h-24 rounded-xl bg-white/5" />
-                  <div className="flex-1 h-24 rounded-xl bg-white/5" />
-                </div>
-                <div className="w-full h-16 rounded-xl bg-white/5 mt-auto" />
-              </div>
-            </div>
+            <img
+              src="/images/aura-health.svg"
+              alt="Aura Health mobile app preview"
+              className="w-[280px] h-[560px] object-cover border-[6px] border-neutral-800 rounded-[2.5rem] shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500 ease-out mt-32"
+            />
           </div>
           <div className="p-8 relative z-20 bg-[#0a0a0a]">
             <div className="flex items-center gap-3 mb-4">
