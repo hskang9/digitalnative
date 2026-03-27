@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "next build && cp .next/routes-manifest.json out/routes-manifest.json",
+    "start": "npx --yes serve@14 out -l 3000"
   },
   "dependencies": {
     "next": "latest",
