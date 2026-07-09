@@ -1,60 +1,29 @@
 import Script from "next/script";
 
-function BrandLogo({ size = "w-8 h-8", showGlow = true }) {
-  return (
-    <div className={`relative ${size} flex items-center justify-center`}>
-      {showGlow ? (
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-md opacity-20 blur-md group-hover:opacity-40 transition-opacity" />
-      ) : null}
-      <svg viewBox="0 0 100 100" className="w-full h-full relative z-10" fill="none">
-        <path d="M25 25 L55 50 L25 75 L15 65 L35 50 L15 35 Z" fill="#00e5ff" />
-        <path
-          d="M45 25 C 85 25 85 75 45 75 L35 65 C 65 65 65 35 35 35 Z"
-          fill="url(#logoGrad)"
-        />
-        <defs>
-          <linearGradient id="logoGrad" x1="45" y1="25" x2="45" y2="75" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#3b82f6" />
-            <stop offset="1" stopColor="#00e5ff" />
-          </linearGradient>
-        </defs>
-      </svg>
-    </div>
-  );
-}
+const CONTACT_EMAIL = "contact@digitalnative.vip";
 
 function Header() {
   return (
-    <header className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-3 group">
-          <BrandLogo />
-          <span className="text-white font-semibold text-xl tracking-tight">Digital Native</span>
+    <header className="site-header">
+      <div className="container site-header-inner">
+        <a href="#" className="brand">
+          <span className="brand-mark" aria-hidden="true">
+            *
+          </span>
+          Digital Native
         </a>
 
-        <nav className="hidden md:flex items-center gap-8 text-lg font-medium text-neutral-400">
-          <a href="#work" className="hover:text-white transition-colors">
-            Work
+        <nav className="site-nav">
+          <a href="#products" className="nav-link">
+            Products
           </a>
-          <a href="#expertise" className="hover:text-white transition-colors">
-            Expertise
+          <a href="#capabilities" className="nav-link">
+            Capabilities
           </a>
-          <a href="#about" className="hover:text-white transition-colors">
-            Company
-          </a>
-        </nav>
-
-        <div className="flex items-center gap-4">
-          <a
-            href="#contact"
-            className="hidden md:flex items-center gap-2 text-lg font-medium text-white bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 rounded-full transition-all"
-          >
+          <a href="#contact" className="btn btn-secondary" style={{ padding: "0.5rem 1rem", fontSize: "0.85rem" }}>
             Start a project
           </a>
-          <button type="button" className="md:hidden text-neutral-400 hover:text-white">
-            <i data-lucide="menu" strokeWidth="1.5" className="w-6 h-6" />
-          </button>
-        </div>
+        </nav>
       </div>
     </header>
   );
@@ -62,207 +31,197 @@ function Header() {
 
 function HeroSection() {
   return (
-    <section className="relative max-w-7xl mx-auto px-6 pt-20 pb-32 flex flex-col items-center text-center">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-br from-cyan-500/20 to-blue-600/20 blur-[120px] rounded-full pointer-events-none" />
-
-      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-base text-neutral-300 font-medium mb-8 relative z-10">
-        <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-        Registered Software Development Firm
-      </div>
-
-      <h1 className="text-6xl md:text-8xl font-semibold tracking-tight text-white mb-8 max-w-5xl leading-[1.1] relative z-10">
-        Engineering the <br className="hidden md:block" />
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-          digital frontier.
-        </span>
-      </h1>
-
-      <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl mb-12 relative z-10 leading-relaxed">
-        We design, build, and scale high-performance web and mobile applications for modern
-        enterprises and fast-growing startups.
-      </p>
-
-      <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10">
-        <a
-          href="#work"
-          className="flex items-center gap-2 text-lg font-medium text-[#0a0a0a] bg-white hover:bg-neutral-200 px-8 py-4 rounded-full transition-all"
-        >
-          Explore our work
-          <i data-lucide="arrow-right" strokeWidth="1.5" className="w-5 h-5" />
-        </a>
-        <a
-          href="#contact"
-          className="flex items-center gap-2 text-lg font-medium text-white bg-white/5 hover:bg-white/10 border border-white/10 px-8 py-4 rounded-full transition-all"
-        >
-          View capabilities
-        </a>
-      </div>
-    </section>
-  );
-}
-
-function SelectedWorkSection() {
-  return (
-    <section id="work" className="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-        <div>
-          <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-white mb-4">
-            Selected Work
-          </h2>
-          <p className="text-xl text-neutral-400 max-w-2xl">
-            A showcase of scalable web platforms and native mobile experiences we&apos;ve delivered.
-          </p>
-        </div>
-        <a
-          href="#"
-          className="flex items-center gap-2 text-lg font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
-        >
-          View all projects
-          <i data-lucide="arrow-up-right" strokeWidth="1.5" className="w-5 h-5" />
-        </a>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="group relative flex flex-col bg-neutral-900/40 border border-white/5 rounded-2xl overflow-hidden hover:bg-neutral-900/60 transition-colors duration-500">
-          <div className="h-[400px] w-full relative bg-[#0c0c0c] flex items-center justify-center p-8 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a0a] z-10" />
-            <img
-              src="/images/nexus-analytics.svg"
-              alt="Nexus Analytics dashboard preview"
-              className="w-full h-full object-cover border border-white/10 rounded-xl shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500 ease-out"
-            />
-          </div>
-          <div className="p-8 relative z-20 bg-[#0a0a0a]">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-base font-medium border border-cyan-500/20">
-                Web App
-              </span>
-              <span className="text-neutral-500 text-base font-medium">FinTech</span>
-            </div>
-            <h3 className="text-3xl font-semibold tracking-tight text-white mb-3">Nexus Analytics</h3>
-            <p className="text-lg text-neutral-400 mb-6 line-clamp-2">
-              A high-frequency trading dashboard processing millions of data points in real-time,
-              built for institutional investors.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-base text-neutral-400 bg-white/5 px-3 py-1 rounded-md">
-                React
-              </span>
-              <span className="text-base text-neutral-400 bg-white/5 px-3 py-1 rounded-md">
-                TypeScript
-              </span>
-              <span className="text-base text-neutral-400 bg-white/5 px-3 py-1 rounded-md">Go</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="group relative flex flex-col bg-neutral-900/40 border border-white/5 rounded-2xl overflow-hidden hover:bg-neutral-900/60 transition-colors duration-500">
-          <div className="h-[400px] w-full relative bg-[#0c0c0c] flex items-center justify-center p-8 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a0a] z-10" />
-            <img
-              src="/images/aura-health.svg"
-              alt="Aura Health mobile app preview"
-              className="w-[280px] h-[560px] object-cover border-[6px] border-neutral-800 rounded-[2.5rem] shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500 ease-out mt-32"
-            />
-          </div>
-          <div className="p-8 relative z-20 bg-[#0a0a0a]">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-base font-medium border border-blue-500/20">
-                Mobile App
-              </span>
-              <span className="text-neutral-500 text-base font-medium">Healthcare</span>
-            </div>
-            <h3 className="text-3xl font-semibold tracking-tight text-white mb-3">Aura Health</h3>
-            <p className="text-lg text-neutral-400 mb-6 line-clamp-2">
-              Cross-platform mobile application for personalized health tracking, integrating with
-              native device health kits.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-base text-neutral-400 bg-white/5 px-3 py-1 rounded-md">
-                React Native
-              </span>
-              <span className="text-base text-neutral-400 bg-white/5 px-3 py-1 rounded-md">
-                Node.js
-              </span>
-              <span className="text-base text-neutral-400 bg-white/5 px-3 py-1 rounded-md">
-                GraphQL
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ExpertiseSection() {
-  return (
-    <section id="expertise" className="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-      <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-white mb-6">
-          Core Capabilities
-        </h2>
-        <p className="text-xl text-neutral-400 max-w-2xl mx-auto">
-          As a full-service technical partner, we handle the entire software development lifecycle.
+    <section className="hero">
+      <div className="container reveal">
+        <p className="hero-badge">Registered software development firm</p>
+        <h1>
+          We build consumer <em>AI products</em> — and ship them to stores.
+        </h1>
+        <p className="hero-lead">
+          Digital Native designs, builds, and operates its own apps end to end
+          — from model integration to app-store release. The same team takes on
+          select client work.
         </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
-          <div className="w-12 h-12 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 mb-6">
-            <i data-lucide="layout-template" strokeWidth="1.5" className="w-6 h-6 text-cyan-400" />
-          </div>
-          <h3 className="text-2xl font-semibold tracking-tight text-white mb-4">Web Applications</h3>
-          <p className="text-lg text-neutral-400">
-            Complex single-page applications, enterprise portals, and scalable SaaS platforms built
-            with modern JavaScript frameworks.
-          </p>
-        </div>
-
-        <div className="p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
-          <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20 mb-6">
-            <i data-lucide="smartphone" strokeWidth="1.5" className="w-6 h-6 text-blue-400" />
-          </div>
-          <h3 className="text-2xl font-semibold tracking-tight text-white mb-4">Mobile Development</h3>
-          <p className="text-lg text-neutral-400">
-            Native and cross-platform mobile applications delivering seamless user experiences across
-            iOS and Android ecosystems.
-          </p>
-        </div>
-
-        <div className="p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
-          <div className="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center border border-purple-500/20 mb-6">
-            <i data-lucide="cloud" strokeWidth="1.5" className="w-6 h-6 text-purple-400" />
-          </div>
-          <h3 className="text-2xl font-semibold tracking-tight text-white mb-4">Cloud Architecture</h3>
-          <p className="text-lg text-neutral-400">
-            Resilient backend systems, serverless architectures, and API development designed for
-            high availability and scale.
-          </p>
+        <div className="hero-actions">
+          <a href="#products" className="btn btn-primary">
+            See our products
+          </a>
+          <a href="#contact" className="btn btn-secondary">
+            Work with us
+          </a>
         </div>
       </div>
     </section>
   );
 }
 
-function CtaSection() {
+function ProductsSection() {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-24">
-      <div className="relative rounded-3xl overflow-hidden bg-neutral-900/50 border border-white/10 p-12 md:p-20 text-center flex flex-col items-center">
-        <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 to-transparent pointer-events-none" />
-        <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-white mb-6 relative z-10">
-          Ready to build the next big thing?
-        </h2>
-        <p className="text-xl text-neutral-400 max-w-2xl mb-10 relative z-10">
-          Partner with our engineering team to turn your vision into a robust digital product.
-        </p>
-        <a
-          href="#contact"
-          className="flex items-center gap-2 text-lg font-medium text-[#0a0a0a] bg-white hover:bg-neutral-200 px-8 py-4 rounded-full transition-all relative z-10"
-        >
-          Get in touch today
-          <i data-lucide="arrow-right" strokeWidth="1.5" className="w-5 h-5" />
-        </a>
+    <section id="products" className="section">
+      <div className="container">
+        <div className="reveal">
+          <h2 className="section-title">Products we run in production</h2>
+          <p className="section-sub">
+            Not a portfolio of mockups — live products with real users, built
+            and operated by us.
+          </p>
+        </div>
+
+        <article className="product reveal">
+          <div>
+            <h3 className="product-name">Imagine</h3>
+            <div className="product-tags">
+              <span className="tag tag-accent">Mobile</span>
+              <span className="tag tag-green">Live on Google Play</span>
+            </div>
+          </div>
+          <div>
+            <p className="product-desc">
+              An AI image and video app. Type a sentence, get a logo, portrait,
+              cinematic still, or short clip — with a gallery, community feed,
+              and creator leaderboard. Expo/React Native on a Supabase and Hono
+              backend, with RevenueCat subscriptions.
+            </p>
+            <a
+              className="product-link"
+              href="https://imagineapp.click"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Visit Imagine →
+            </a>
+            <span className="product-domain">imagineapp.click</span>
+          </div>
+        </article>
+
+        <article className="product reveal">
+          <div>
+            <h3 className="product-name">JobClaw</h3>
+            <div className="product-tags">
+              <span className="tag tag-accent">Web</span>
+              <span className="tag tag-yellow">AI portfolio</span>
+            </div>
+          </div>
+          <div>
+            <p className="product-desc">
+              An AI portfolio for developers. Connect your GitHub and JobClaw
+              builds a job-winning technical profile from your actual work —
+              projects, contributions, and skills, presented for recruiters.
+            </p>
+            <a
+              className="product-link"
+              href="https://jobclaw.fyi"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Visit JobClaw →
+            </a>
+            <span className="product-domain">jobclaw.fyi</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function CapabilityIcon({ children }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
+}
+
+function CapabilitiesSection() {
+  return (
+    <section id="capabilities" className="section">
+      <div className="container">
+        <div className="reveal">
+          <h2 className="section-title">What we take on</h2>
+          <p className="section-sub">
+            Full-lifecycle software development, informed by shipping our own
+            products.
+          </p>
+        </div>
+
+        <div className="capabilities">
+          <div className="capability reveal">
+            <div className="capability-icon">
+              <CapabilityIcon>
+                <rect x="3" y="4" width="18" height="14" rx="2" />
+                <path d="M3 9h18M7 21h10" />
+              </CapabilityIcon>
+            </div>
+            <h3>Web applications</h3>
+            <p>
+              SaaS platforms, dashboards, and marketing sites with Next.js —
+              deployed on Vercel with real attention to performance and detail.
+            </p>
+          </div>
+
+          <div className="capability reveal">
+            <div className="capability-icon">
+              <CapabilityIcon>
+                <rect x="7" y="2" width="10" height="20" rx="2.5" />
+                <path d="M11 18.5h2" />
+              </CapabilityIcon>
+            </div>
+            <h3>Mobile apps</h3>
+            <p>
+              Cross-platform apps with Expo and React Native, taken all the way
+              through store submission, subscriptions, and post-launch
+              operations.
+            </p>
+          </div>
+
+          <div className="capability reveal">
+            <div className="capability-icon">
+              <CapabilityIcon>
+                <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.2 6.2l2.8 2.8M15 15l2.8 2.8M17.8 6.2 15 9M9 15l-2.8 2.8" />
+              </CapabilityIcon>
+            </div>
+            <h3>AI integration</h3>
+            <p>
+              Image, video, and language model features built into real
+              products — generation pipelines, credit systems, and moderation
+              included.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ContactSection() {
+  return (
+    <section id="contact" className="section">
+      <div className="container">
+        <div className="contact-card reveal">
+          <div>
+            <h2>Have a product to build?</h2>
+            <p>
+              Tell us what you are trying to ship. We reply to every serious
+              inquiry within two business days.
+            </p>
+            <span className="contact-email">
+              <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            </span>
+          </div>
+          <a href={`mailto:${CONTACT_EMAIL}`} className="btn btn-primary">
+            Start a conversation
+          </a>
+        </div>
       </div>
     </section>
   );
@@ -270,47 +229,18 @@ function CtaSection() {
 
 function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-[#0a0a0a] pt-16 pb-8">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16">
-          <div className="flex items-center gap-3">
-            <BrandLogo size="w-6 h-6" showGlow={false} />
-            <span className="text-white font-semibold text-lg tracking-tight">Digital Native</span>
-          </div>
-
-          <nav className="flex flex-wrap gap-8 text-lg text-neutral-400 font-medium">
-            <a href="#" className="hover:text-white transition-colors">
-              Work
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Services
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Company
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Careers
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Contact
-            </a>
-          </nav>
-        </div>
-
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-white/5 text-base text-neutral-500">
-          <p>© 2024 Digital Native Software Development Firm. All rights reserved.</p>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition-colors">
-              Twitter
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              LinkedIn
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              GitHub
-            </a>
-          </div>
-        </div>
+    <footer className="site-footer">
+      <div className="container site-footer-inner">
+        <span>© 2026 Digital Native. All rights reserved.</span>
+        <nav>
+          <a href="https://imagineapp.click" rel="noopener noreferrer" target="_blank">
+            Imagine
+          </a>
+          <a href="https://jobclaw.fyi" rel="noopener noreferrer" target="_blank">
+            JobClaw
+          </a>
+          <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
+        </nav>
       </div>
     </footer>
   );
@@ -319,17 +249,36 @@ function Footer() {
 export default function HomePage() {
   return (
     <>
+      <Script id="js-flag" strategy="beforeInteractive">
+        {`document.documentElement.classList.add('js')`}
+      </Script>
       <Header />
-      <main className="flex-1 pt-32 pb-24">
+      <main style={{ flex: 1 }}>
         <HeroSection />
-        <SelectedWorkSection />
-        <ExpertiseSection />
-        <CtaSection />
+        <ProductsSection />
+        <CapabilitiesSection />
+        <ContactSection />
       </main>
       <Footer />
-      <Script src="https://unpkg.com/lucide@latest" strategy="afterInteractive" />
-      <Script id="lucide-init" strategy="afterInteractive">
-        {`window.lucide?.createIcons();`}
+      <Script id="reveal-init" strategy="afterInteractive">
+        {`
+          (function () {
+            var nodes = document.querySelectorAll('.reveal');
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+              nodes.forEach(function (n) { n.classList.add('is-revealed'); });
+              return;
+            }
+            var observer = new IntersectionObserver(function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('is-revealed');
+                  observer.unobserve(entry.target);
+                }
+              });
+            }, { threshold: 0.15 });
+            nodes.forEach(function (n) { observer.observe(n); });
+          })();
+        `}
       </Script>
     </>
   );

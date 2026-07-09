@@ -1,15 +1,24 @@
 import "./globals.css";
-import Script from "next/script";
 
 export const metadata = {
-  title: "Digital Native | Software Development Firm",
+  title: "Digital Native — software firm building consumer AI products",
   description:
-    "We design, build, and scale high-performance web and mobile applications.",
+    "Digital Native is a registered software development firm. We build and operate consumer AI products — Imagine, an AI image and video app, and JobClaw, an AI portfolio for developers — and take on select client work.",
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png" }],
+  },
+  openGraph: {
+    title: "Digital Native — software firm building consumer AI products",
+    description:
+      "We build and operate consumer AI products: Imagine (AI image & video) and JobClaw (AI developer portfolios).",
+    type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark scroll-smooth">
+    <html lang="en" className="scroll-smooth">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -18,14 +27,11 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#0a0a0a] text-neutral-300 min-h-screen flex flex-col antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
-        <Script src="https://cdn.tailwindcss.com" strategy="beforeInteractive" />
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
