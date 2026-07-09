@@ -1,14 +1,14 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Digital Native — software firm building consumer AI products",
+  title: "Digital Native — software development firm",
   description:
     "Digital Native is a registered software development firm. We build and operate consumer AI products — Imagine, an AI image and video app, and JobClaw, an AI portfolio for developers — and take on select client work.",
   icons: {
     icon: [{ url: "/favicon.png", type: "image/png" }],
   },
   openGraph: {
-    title: "Digital Native — software firm building consumer AI products",
+    title: "Digital Native — software development firm",
     description:
       "We build and operate consumer AI products: Imagine (AI image & video) and JobClaw (AI developer portfolios).",
     type: "website",
@@ -18,7 +18,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700&display=swap"
           rel="stylesheet"
         />
       </head>
