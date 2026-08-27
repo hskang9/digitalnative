@@ -492,12 +492,20 @@ const STACK = [
   {
     index: "LANG / L-01",
     title: { en: "Languages", ko: "언어" },
-    items: ["TypeScript", "JavaScript", "Rust", "Python"],
+    items: [
+      "TypeScript",
+      "JavaScript",
+      "Rust",
+      "Python",
+      "Java",
+      "Kotlin",
+      "C++",
+    ],
   },
   {
     index: "WEB / W-02",
     title: { en: "Web", ko: "웹" },
-    items: ["Next.js", "React", "Tailwind CSS"],
+    items: ["Next.js", "React", "Tailwind CSS", "Three.js"],
   },
   {
     index: "MOBILE / M-03",
@@ -507,27 +515,46 @@ const STACK = [
   {
     index: "SERVER / S-04",
     title: { en: "Server", ko: "서버" },
-    items: ["Node.js", "Hono", "FastAPI"],
+    items: ["Node.js", "NestJS", "Hono", "FastAPI", "Axum", "Rayon"],
   },
   {
     index: "DATA / D-05",
     title: { en: "Data", ko: "데이터" },
-    items: ["PostgreSQL", "Drizzle", "Supabase", "Firestore"],
+    items: ["PostgreSQL", "Neon", "Drizzle", "Supabase", "Firestore"],
   },
   {
-    index: "CLOUD / C-06",
+    index: "EVENTS / E-06",
+    title: { en: "Events & messaging", ko: "이벤트 · 메시징" },
+    items: ["Kafka", "RabbitMQ", "Redis Streams"],
+  },
+  {
+    index: "CLOUD / C-07",
     title: { en: "Cloud & infra", ko: "클라우드 · 인프라" },
-    items: ["AWS S3", "Vercel", "Railway", "Docker", "Grafana"],
+    items: ["AWS S3", "Vercel", "Railway", "Docker", "Grafana", "k6"],
   },
   {
-    index: "AI / A-07",
+    index: "AI / A-08",
     title: { en: "AI", ko: "AI" },
-    items: ["OpenAI", "Image + video models", "Firebase Auth"],
+    items: [
+      "OpenAI",
+      "Claude Code",
+      "Keras",
+      "Image + video models",
+      "Firebase Auth",
+    ],
   },
   {
-    index: "ONCHAIN / O-08",
+    index: "ONCHAIN / O-09",
     title: { en: "Onchain", ko: "온체인" },
-    items: ["Solidity", "Foundry", "viem", "wagmi", "Ponder"],
+    items: [
+      "Solidity",
+      "Foundry",
+      "viem",
+      "wagmi",
+      "Ponder",
+      "Polkadot",
+      "Parity Substrate",
+    ],
   },
 ];
 
