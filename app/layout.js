@@ -30,6 +30,10 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700&display=swap"
           rel="stylesheet"
         />
+        <noscript>
+          {/* Without JS the reveal observer never runs — show everything. */}
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
       </head>
       <body>{children}</body>
     </html>
