@@ -52,6 +52,9 @@ function Header() {
           <a href="#capabilities" className="nav-link">
             02 / Capabilities
           </a>
+          <a href="#media" className="nav-link">
+            03 / Media
+          </a>
           {SOCIALS.map((social) => (
             <a
               aria-label={social.label}
@@ -324,6 +327,118 @@ function CapabilitiesSection() {
   );
 }
 
+/**
+ * Press, podcasts, and interviews. Add newest first; each entry is one
+ * object — no other change is needed for it to render.
+ *
+ *   {
+ *     outlet: "Some Podcast",
+ *     title: "Building consumer AI solo",
+ *     format: "Podcast",          // Podcast | Interview | Video | Article | Talk
+ *     date: "2026-09",            // YYYY-MM, printed as SEP 2026
+ *     href: "https://youtube.com/watch?v=...",
+ *     note: "One line on what was covered.",   // optional
+ *   }
+ */
+const MEDIA = [];
+
+const MONTHS = [
+  "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+  "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+];
+
+function printDate(date) {
+  if (!date) return "—";
+  const [year, month] = date.split("-");
+  const label = MONTHS[Number(month) - 1];
+  return label ? `${label} ${year}` : year;
+}
+
+function hostOf(href) {
+  try {
+    return new URL(href).hostname.replace(/^www\./, "");
+  } catch {
+    return href;
+  }
+}
+
+function MediaRow({ item, last }) {
+  const rowEnd = last ? " row-end" : "";
+
+  return (
+    <>
+      <div
+        className={`media-cell-outlet${rowEnd}`}
+        data-reveal
+        data-reveal-step="0"
+      >
+        <span className="media-format">{item.format}</span>
+        <h3 className="media-outlet">{item.outlet}</h3>
+        <span className="media-date">{printDate(item.date)}</span>
+      </div>
+      <div
+        className={`media-cell-title${rowEnd}`}
+        data-reveal
+        data-reveal-step="1"
+      >
+        <p className="media-title">{item.title}</p>
+        {item.note ? <p className="media-note">{item.note}</p> : null}
+      </div>
+      <div
+        className={`media-cell-link${rowEnd}`}
+        data-reveal
+        data-reveal-step="2"
+      >
+        <a
+          className="product-link"
+          href={item.href}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          {hostOf(item.href)} <span className="arrow">→</span>
+        </a>
+      </div>
+    </>
+  );
+}
+
+function MediaSection() {
+  return (
+    <section id="media">
+      <div className="section-head">
+        <h2>
+          <span className="index">03</span>[ Media &amp; appearances ]
+        </h2>
+        <span className="aside">
+          {MEDIA.length
+            ? `${MEDIA.length} entr${MEDIA.length === 1 ? "y" : "ies"} on file`
+            : "Press, podcasts, interviews"}
+        </span>
+      </div>
+
+      {MEDIA.length ? (
+        <div className="media-table">
+          {MEDIA.map((item, i) => (
+            <MediaRow item={item} key={item.href} last={i === MEDIA.length - 1} />
+          ))}
+        </div>
+      ) : (
+        <div className="media-empty" data-reveal data-reveal-step="0">
+          <span className="mono-label media-empty-file">
+            FILE / DN-MEDIA <span className="red">— 0 ENTRIES</span>
+          </span>
+          <p>
+            Interviews, podcasts, and press are logged here as they publish.
+          </p>
+          <a className="product-link" href={`mailto:${CONTACT_EMAIL}`}>
+            Press enquiries <span className="arrow">→</span>
+          </a>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function ContactSection() {
   return (
     <section id="contact" className="contact">
@@ -406,6 +521,7 @@ export default function HomePage() {
         <HeroSection />
         <ProductsSection />
         <CapabilitiesSection />
+        <MediaSection />
         <ContactSection />
         <div className="hazard" aria-hidden="true" />
       </main>

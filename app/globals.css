@@ -614,6 +614,154 @@ a {
 }
 
 /* ===================================================================
+ * MEDIA & APPEARANCES — same doc-table language as the product ledger.
+ * =================================================================== */
+
+.media-table {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 6fr) minmax(0, 2fr);
+  border-bottom: 2px solid var(--ink);
+}
+
+.media-table > * {
+  padding: 1.5rem 1.25rem;
+  border-bottom: 1px solid var(--ink);
+  min-width: 0;
+}
+
+.media-table > .row-end {
+  border-bottom: none;
+}
+
+.media-cell-outlet,
+.media-cell-title {
+  border-right: 1px solid var(--ink);
+}
+
+.media-cell-outlet {
+  position: relative;
+}
+
+.media-cell-outlet::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--red);
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 380ms var(--ease-press);
+}
+
+.media-cell-outlet:hover::before {
+  transform: scaleY(1);
+}
+
+.media-format {
+  display: block;
+  color: var(--red);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.6rem;
+}
+
+.media-outlet {
+  font-family: var(--font-macro);
+  font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+  transition: transform 380ms var(--ease-press);
+}
+
+.media-cell-outlet:hover .media-outlet {
+  transform: translate3d(0.35rem, 0, 0);
+}
+
+.media-date {
+  color: var(--mute);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.media-title {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  max-width: 38rem;
+}
+
+.media-note {
+  margin: 0.6rem 0 0;
+  color: var(--mute);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  max-width: 38rem;
+}
+
+@media (max-width: 52rem) {
+  .media-table {
+    grid-template-columns: 1fr;
+  }
+
+  .media-cell-outlet,
+  .media-cell-title {
+    border-right: none;
+  }
+
+  .media-cell-outlet {
+    padding-bottom: 0.75rem;
+    border-bottom: none;
+  }
+
+  .media-cell-title {
+    padding-top: 0;
+    border-bottom: none;
+  }
+
+  .media-cell-link {
+    padding-top: 0;
+  }
+}
+
+/* Empty state — reads as a filed record, not a gap */
+.media-empty {
+  padding: clamp(2rem, 5vw, 3.25rem) 1.25rem;
+  border-bottom: 2px solid var(--ink);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 11px,
+    rgba(10, 10, 10, 0.035) 11px,
+    rgba(10, 10, 10, 0.035) 12px
+  );
+}
+
+.media-empty-file {
+  display: block;
+  color: var(--mute);
+  margin-bottom: 1.1rem;
+}
+
+.media-empty-file .red {
+  color: var(--red);
+}
+
+.media-empty p {
+  margin: 0 0 1.5rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  max-width: 34rem;
+}
+
+/* ===================================================================
  * MOTION — mechanical, not decorative.
  * Everything here is a press: things slide into register, ink wipes
  * across a plate, a caret ticks. No bounce, no float, no fade-drift.
