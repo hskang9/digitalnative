@@ -72,8 +72,11 @@ function Header() {
           <a href="#capabilities" className="nav-link">
             <T en="02 / Capabilities" ko="02 / 역량" />
           </a>
+          <a href="#stack" className="nav-link">
+            <T en="03 / Stack" ko="03 / 스택" />
+          </a>
           <a href="#media" className="nav-link">
-            <T en="03 / Media" ko="03 / 미디어" />
+            <T en="04 / Media" ko="04 / 미디어" />
           </a>
           <LocaleToggle />
           {SOCIALS.map((social) => (
@@ -447,6 +450,92 @@ function CapabilitiesSection() {
 }
 
 /**
+ * Stack specimen. Every entry is something that ships in a product above —
+ * add to a group's `items` and it renders; no other change is needed.
+ */
+const STACK = [
+  {
+    index: "LANG / L-01",
+    title: { en: "Languages", ko: "언어" },
+    items: ["TypeScript", "JavaScript", "Rust", "Python"],
+  },
+  {
+    index: "WEB / W-02",
+    title: { en: "Web", ko: "웹" },
+    items: ["Next.js", "React", "Tailwind CSS"],
+  },
+  {
+    index: "MOBILE / M-03",
+    title: { en: "Mobile", ko: "모바일" },
+    items: ["React Native", "Expo", "RevenueCat"],
+  },
+  {
+    index: "SERVER / S-04",
+    title: { en: "Server", ko: "서버" },
+    items: ["Node.js", "Hono", "FastAPI"],
+  },
+  {
+    index: "DATA / D-05",
+    title: { en: "Data", ko: "데이터" },
+    items: ["PostgreSQL", "Drizzle", "Supabase", "Firestore"],
+  },
+  {
+    index: "CLOUD / C-06",
+    title: { en: "Cloud & infra", ko: "클라우드 · 인프라" },
+    items: ["AWS S3", "Vercel", "Railway", "Docker", "Grafana"],
+  },
+  {
+    index: "AI / A-07",
+    title: { en: "AI", ko: "AI" },
+    items: ["OpenAI", "Image + video models", "Firebase Auth"],
+  },
+  {
+    index: "ONCHAIN / O-08",
+    title: { en: "Onchain", ko: "온체인" },
+    items: ["Solidity", "Foundry", "viem", "wagmi", "Ponder"],
+  },
+];
+
+function StackSection() {
+  return (
+    <section id="stack">
+      <div className="section-head">
+        <h2>
+          <span className="index">03</span>
+          <T en="[ Stack ]" ko="[ 기술 스택 ]" />
+        </h2>
+        <span className="aside">
+          <T
+            en="Shipping in the products above"
+            ko="위 제품들에 실제로 쓰인 것들"
+          />
+        </span>
+      </div>
+
+      <div className="stack-grid">
+        {STACK.map((group, i) => (
+          <div className="stack-group" key={group.index}>
+            {/* Same reason as the capability cards: the grid paints its
+                rules with an ink ground, so the reveal sits inside. */}
+            <div className="stack-body" data-reveal data-reveal-step={i}>
+              <span className="stack-index">{group.index}</span>
+              <h3>
+                <T en={group.title.en} ko={group.title.ko} />
+              </h3>
+              <ul className="stack-list">
+                {group.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
  * Press, podcasts, and interviews. Add newest first; each entry is one
  * object — no other change is needed for it to render.
  *
@@ -545,7 +634,7 @@ function MediaSection() {
     <section id="media">
       <div className="section-head">
         <h2>
-          <span className="index">03</span>
+          <span className="index">04</span>
           <T en="[ Media & appearances ]" ko="[ 미디어 & 출연 ]" />
         </h2>
         <span className="aside">
@@ -686,6 +775,7 @@ export default function HomePage() {
         <HeroSection />
         <ProductsSection />
         <CapabilitiesSection />
+        <StackSection />
         <MediaSection />
         <ContactSection />
         <div className="hazard" aria-hidden="true" />
