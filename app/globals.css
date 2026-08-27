@@ -635,6 +635,18 @@ a {
   box-shadow: inset 0 0 0 2px var(--mute);
 }
 
+/* Archived reads as a line ruled through the entry, not a state you can
+   still be in — so the indicator closes to a bar rather than a square. */
+.status-archived {
+  color: var(--mute);
+}
+
+.status-archived .status-dot {
+  height: 2px;
+  align-self: center;
+  background: var(--mute);
+}
+
 /* Capabilities — compartments */
 .capability-grid {
   display: grid;
@@ -1518,7 +1530,8 @@ html:not([data-locale="ko"]) .lang-btn[data-set="en"] {
   animation: beacon 1.9s var(--ease-mech) infinite;
 }
 
-.status-beta .status-dot {
+.status-beta .status-dot,
+.status-archived .status-dot {
   animation: none;
 }
 

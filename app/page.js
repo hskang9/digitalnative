@@ -117,7 +117,11 @@ function Header() {
 const STATUS_LABELS = {
   Live: { en: "Live", ko: "운영 중" },
   Beta: { en: "Beta", ko: "베타" },
+  Archived: { en: "Archived", ko: "아카이브" },
 };
+
+/** Archived work stays in the ledger below, but it is not in production. */
+const isShipping = (product) => product.status !== "Archived";
 
 function Odometer({ value }) {
   const digits = String(value).padStart(2, "0").split("");
@@ -160,7 +164,7 @@ function HeroSection() {
         </p>
 
         <div className="hero-out">
-          <Odometer value={PRODUCTS.length} />
+          <Odometer value={PRODUCTS.filter(isShipping).length} />
 
           <div>
             <h1>
@@ -168,8 +172,7 @@ function HeroSection() {
             </h1>
 
             <ul className="manifest">
-              {PRODUCTS.map((product, i) => {
-                const live = product.status === "Live";
+              {PRODUCTS.filter(isShipping).map((product, i) => {
                 const status = STATUS_LABELS[product.status];
 
                 return (
@@ -185,7 +188,13 @@ function HeroSection() {
                     <span className="manifest-blurb">
                       <T en={product.short.en} ko={product.short.ko} />
                     </span>
-                    <span className={live ? "manifest-st" : "manifest-st beta"}>
+                    <span
+                      className={
+                        product.status === "Live"
+                          ? "manifest-st"
+                          : "manifest-st beta"
+                      }
+                    >
                       <T en={status.en} ko={status.ko} />
                     </span>
                   </li>
@@ -211,6 +220,26 @@ function HeroSection() {
 
 const PRODUCTS = [
   {
+    name: "Iter",
+    short: {
+      en: "Onchain orderbook exchange",
+      ko: "온체인 오더북 거래소",
+    },
+    logo: "/logos/iter.png",
+    meta: {
+      en: "Web / Onchain exchange / Next.js · Ponder · Postgres · Redis · Rust",
+      ko: "웹 / 온체인 거래소 / Next.js · Ponder · Postgres · Redis · Rust",
+    },
+    desc: {
+      en:
+        "One open onchain order book — every fill at a price you chose, self-custody the whole way. Chain events run through a Ponder indexer and a queue-backed broker into Postgres, then fan out over a uWebSockets gateway to a realtime portal.",
+      ko:
+        "하나의 열린 온체인 오더북 — 모든 체결이 직접 정한 가격에서 이뤄지고, 자산은 끝까지 본인 지갑에 있습니다. 체인 이벤트는 Ponder 인덱서와 큐 기반 브로커를 거쳐 Postgres에 쌓이고, uWebSockets 게이트웨이를 통해 실시간 포털로 전달됩니다.",
+    },
+    links: [{ href: "https://iter.cx", label: "iter.cx →" }],
+    status: "Live",
+  },
+  {
     name: "Standard",
     short: { en: "Onchain orderbook DEX", ko: "온체인 오더북 DEX" },
     logo: "/logos/standard.png",
@@ -220,15 +249,12 @@ const PRODUCTS = [
     },
     desc: {
       en:
-        "A fully onchain central-limit orderbook exchange — live charts, depth, and market/limit/pro order entry, settled onchain rather than against an AMM curve. Now operated as Iter.",
+        "A fully onchain central-limit orderbook exchange — live charts, depth, and market/limit/pro order entry, settled onchain rather than against an AMM curve. The first generation of the exchange, rebuilt as Iter above.",
       ko:
-        "완전 온체인 중앙지정가 오더북 거래소 — 실시간 차트와 호가창, 시장가·지정가·프로 주문을 AMM 커브가 아닌 온체인에서 체결합니다. 현재 Iter로 운영 중입니다.",
+        "완전 온체인 중앙지정가 오더북 거래소 — 실시간 차트와 호가창, 시장가·지정가·프로 주문을 AMM 커브가 아닌 온체인에서 체결합니다. 거래소의 1세대이며, 위의 Iter로 새로 만들었습니다.",
     },
-    links: [
-      { href: "https://standard.im", label: "standard.im →" },
-      { href: "https://iter.cx", label: "iter.cx →" },
-    ],
-    status: "Live",
+    links: [{ href: "https://standard.im", label: "standard.im →" }],
+    status: "Archived",
     video: {
       src: "/media/dex_demo.mp4",
       poster: "/media/dex_demo-poster.jpg",
@@ -310,8 +336,8 @@ const PRODUCTS = [
 
 function ProductRow({ product, last }) {
   const rowEnd = last ? " row-end" : "";
-  const live = product.status === "Live";
   const status = STATUS_LABELS[product.status];
+  const tone = { Live: "", Beta: " status-beta", Archived: " status-archived" };
 
   return (
     <>
@@ -381,7 +407,7 @@ function ProductRow({ product, last }) {
         data-reveal
         data-reveal-step="2"
       >
-        <span className={live ? "status" : "status status-beta"}>
+        <span className={`status${tone[product.status] || ""}`}>
           <span className="status-dot" aria-hidden="true" />
           <T en={status.en} ko={status.ko} />
         </span>
