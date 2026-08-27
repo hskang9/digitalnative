@@ -114,74 +114,105 @@ function Header() {
   );
 }
 
-function HeroSection() {
-  return (
-    <section className="hero">
-      <p className="hero-kicker mono-label hero-step" style={{ "--step": 0 }}>
-        <span className="red">///</span>{" "}
-        <T
-          en="Consumer AI products, built and operated in-house"
-          ko="자체 개발하고 직접 운영하는 컨슈머 AI 제품"
-        />
-      </p>
-
-      <h1 data-l="en">
-        <span className="word" style={{ "--step": 0 }}>
-          <span className="word-in">Software</span>
-        </span>{" "}
-        <span className="word" style={{ "--step": 1 }}>
-          <span className="word-in">that</span>
-        </span>{" "}
-        <span className="word" style={{ "--step": 2 }}>
-          <span className="word-in">
-            <span className="strike">demos</span>
-          </span>
-        </span>{" "}
-        <span className="word" style={{ "--step": 3 }}>
-          <span className="word-in">ships.</span>
-        </span>
-      </h1>
-      <h1 data-l="ko" lang="ko">
-        <span className="word" style={{ "--step": 0 }}>
-          <span className="word-in">
-            <span className="strike">데모</span>
-          </span>
-        </span>{" "}
-        <span className="word" style={{ "--step": 1 }}>
-          <span className="word-in">출시하는</span>
-        </span>{" "}
-        <span className="word" style={{ "--step": 2 }}>
-          <span className="word-in">소프트웨어.</span>
-        </span>
-      </h1>
-
-      <p className="hero-sub hero-step" style={{ "--step": 5 }}>
-        <T
-          en="Digital Native designs, builds, and operates its own apps end to end — from model integration to app-store release. The same team takes on select client work."
-          ko="디지털 네이티브는 모델 연동부터 앱스토어 출시까지, 자사 앱을 처음부터 끝까지 직접 설계하고 개발하고 운영합니다. 같은 팀이 선별한 클라이언트 작업도 함께 진행합니다."
-        />
-      </p>
-      <div className="hero-actions hero-step" style={{ "--step": 6 }}>
-        <a href="#products" className="btn btn-ink">
-          <T en="See our products" ko="제품 보기" />{" "}
-          <span className="arrow">&gt;&gt;&gt;</span>
-        </a>
-        <a href="#contact" className="btn btn-paper">
-          <T en="Work with us" ko="함께 일하기" />
-        </a>
-      </div>
-    </section>
-  );
-}
-
 const STATUS_LABELS = {
   Live: { en: "Live", ko: "운영 중" },
   Beta: { en: "Beta", ko: "베타" },
 };
 
+function Odometer({ value }) {
+  const digits = String(value).padStart(2, "0").split("");
+
+  return (
+    <div className="reel-row" aria-label={String(value)}>
+      {digits.map((digit, i) => (
+        <span className="reel" key={i}>
+          {/* Rests on its final digit, so the count is right even if the
+              roll never plays. motion.js snaps it back to 0 first. */}
+          <span
+            className="reel-strip"
+            data-reel={digit}
+            style={{ transform: `translateY(-${Number(digit) * 10}%)` }}
+          >
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+              <i key={n}>{n}</i>
+            ))}
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function HeroSection() {
+  return (
+    <section className="hero" data-hero>
+      {/* Drifting press ink, screened to a halftone dot by CSS so the ground
+          reads as something printed rather than as a gradient. */}
+      <canvas className="hero-field" data-field aria-hidden="true" />
+
+      <div className="hero-inner">
+        <p className="hero-kicker mono-label hero-step" style={{ "--step": 0 }}>
+          <span className="mark">///</span>{" "}
+          <T
+            en="Consumer AI products, built and operated in-house"
+            ko="자체 개발하고 직접 운영하는 컨슈머 AI 제품"
+          />
+        </p>
+
+        <div className="hero-out">
+          <Odometer value={PRODUCTS.length} />
+
+          <div>
+            <h1>
+              <T en="Products in production." ko="운영 중인 제품." />
+            </h1>
+
+            <ul className="manifest">
+              {PRODUCTS.map((product, i) => {
+                const live = product.status === "Live";
+                const status = STATUS_LABELS[product.status];
+
+                return (
+                  <li key={product.name} style={{ "--i": i }}>
+                    <img
+                      alt=""
+                      className="manifest-logo"
+                      height="56"
+                      src={product.logo}
+                      width="56"
+                    />
+                    <span className="manifest-name">{product.name}</span>
+                    <span className="manifest-blurb">
+                      <T en={product.short.en} ko={product.short.ko} />
+                    </span>
+                    <span className={live ? "manifest-st" : "manifest-st beta"}>
+                      <T en={status.en} ko={status.ko} />
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="hero-actions hero-step" style={{ "--step": 6 }}>
+              <a href="#products" className="btn btn-ink">
+                <T en="See our products" ko="제품 보기" />{" "}
+                <span className="arrow">&gt;&gt;&gt;</span>
+              </a>
+              <a href="#contact" className="btn btn-paper">
+                <T en="Work with us" ko="함께 일하기" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const PRODUCTS = [
   {
     name: "Standard",
+    short: { en: "Onchain orderbook DEX", ko: "온체인 오더북 DEX" },
     logo: "/logos/standard.png",
     meta: {
       en: "Web / Onchain orderbook DEX",
@@ -209,6 +240,7 @@ const PRODUCTS = [
   },
   {
     name: "Imagine",
+    short: { en: "AI image & video, on Google Play", ko: "AI 이미지·영상, 구글 플레이" },
     logo: "/logos/imagine.png",
     meta: {
       en: "Mobile / AI image + video / Expo · Supabase · RevenueCat",
@@ -225,6 +257,7 @@ const PRODUCTS = [
   },
   {
     name: "JobClaw",
+    short: { en: "AI developer portfolios", ko: "AI 개발자 포트폴리오" },
     logo: "/logos/jobclaw.png",
     meta: {
       en: "Web / AI developer portfolios",
@@ -241,6 +274,7 @@ const PRODUCTS = [
   },
   {
     name: "Mochi",
+    short: { en: "Private photo album, KR + EN", ko: "비공개 사진첩, 한국어 + 영어" },
     logo: "/logos/mochi.png",
     meta: {
       en: "Mobile + web / Expo · Hono · Firestore",
@@ -257,6 +291,7 @@ const PRODUCTS = [
   },
   {
     name: "Pensa",
+    short: { en: "AI academic writing analysis", ko: "AI 학술 글쓰기 분석" },
     logo: "/logos/pensa.png",
     meta: {
       en: "Web / AI writing analysis / Next.js · FastAPI",
@@ -361,7 +396,7 @@ function ProductsSection() {
       <div className="section-head">
         <h2>
           <span className="index">01</span>
-          <T en="[ Products in production ]" ko="[ 운영 중인 제품 ]" />
+          <T en="[ Products, in detail ]" ko="[ 제품 상세 ]" />
         </h2>
         <span className="aside">
           <T en="Live systems — not mockups" ko="실제 서비스 — 목업 아님" />

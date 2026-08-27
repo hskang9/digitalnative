@@ -11,6 +11,19 @@
   --ink-soft: #333330;
   --mute: #6b6a66;
   --red: #e61919;
+  /*
+   * The hero inverts. Every step is a solid colour stepped down from the
+   * same warm neutral as --paper, so the ink ground reads as one
+   * temperature — and because nothing is white-at-alpha, no text shifts
+   * colour as the field drifts underneath it.
+   */
+  --g-0: #0a0a0a;
+  --g-2: #383734;
+  --g-3: #5c5b56;
+  --t-3: #a2a19a;
+  --t-2: #c6c5bf;
+  --t-1: #f4f4f0;
+  --acc: #ff3b36;
   --font-macro: "Archivo Black", "Black Han Sans", "Arial Black", sans-serif;
   --font-mono: "JetBrains Mono", "Nanum Gothic Coding", "Courier New",
     monospace;
@@ -170,59 +183,225 @@ a {
   color: var(--red);
 }
 
-/* Hero */
+/* Hero — the one inverted band on the page */
 .hero {
-  padding: clamp(3rem, 7vw, 6rem) 1.25rem clamp(2.5rem, 5vw, 4.5rem);
-  border-bottom: 2px solid var(--ink);
   position: relative;
+  overflow: hidden;
+  padding: clamp(2.75rem, 6vw, 5rem) 1.25rem clamp(2.75rem, 5vw, 4.25rem);
+  border-bottom: 2px solid var(--ink);
+  background: var(--g-0);
+  color: var(--t-1);
+}
+
+.hero-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Halftone screen over the field, so the ground reads as something
+   printed rather than as a gradient. */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(10, 10, 10, 0.55) 1px, transparent 1.35px);
+  background-size: 4px 4px;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
 }
 
 .hero-kicker {
-  color: var(--mute);
+  color: var(--t-3);
   margin: 0 0 1.75rem;
 }
 
-.hero-kicker .red {
-  color: var(--red);
+.hero-kicker .mark {
+  color: var(--acc);
+}
+
+.hero-out {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(1.25rem, 3.5vw, 3rem);
+  align-items: start;
+}
+
+@media (max-width: 46rem) {
+  .hero-out {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Odometer */
+.reel-row {
+  display: flex;
+  line-height: 1;
+  color: var(--t-1);
+}
+
+.reel {
+  display: block;
+  height: 1em;
+  overflow: hidden;
+  font-family: var(--font-macro);
+  font-size: clamp(4.5rem, 12vw, 9.5rem);
+  letter-spacing: -0.04em;
+}
+
+/* One cell per digit, and the strip travels in percentages of its own
+   height — em maths drifts against the cell height at clamp boundaries. */
+.reel i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1em;
+  line-height: 1;
+  font-style: normal;
+}
+
+.reel-strip {
+  display: block;
+}
+
+.hero.is-playing .reel-strip {
+  transition: transform 1500ms var(--ease-press);
 }
 
 .hero h1 {
   font-family: var(--font-macro);
-  font-size: clamp(2.9rem, 9.5vw, 8.25rem);
-  line-height: 0.92;
+  font-size: clamp(1.6rem, 4vw, 3.2rem);
+  line-height: 0.96;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  margin: 0 0 2rem;
-  max-width: 12ch;
+  margin: 0 0 1.6rem;
+  max-width: 14ch;
+  color: var(--t-1);
 }
 
-.hero h1 .strike {
-  position: relative;
+/* Manifest — the ledger below, in summary */
+.manifest {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--g-3);
+  max-width: 38rem;
+}
+
+.manifest li {
+  display: grid;
+  grid-template-columns: auto minmax(6.5rem, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--g-2);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 34rem) {
+  .manifest li {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .manifest-blurb {
+    display: none;
+  }
+}
+
+/* Each mark sits on its own paper chip, so it reads the same regardless
+   of what the field is doing behind it. */
+.manifest-logo {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: block;
+  background: var(--paper);
+  border: 1px solid var(--g-3);
+  object-fit: contain;
+}
+
+.manifest-name {
+  font-weight: 700;
+  color: var(--t-1);
+}
+
+.manifest-blurb {
+  color: var(--t-2);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.manifest-st {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--t-2);
   white-space: nowrap;
 }
 
-.hero h1 .strike::after {
+.manifest-st::before {
   content: "";
-  position: absolute;
-  left: -0.05em;
-  right: -0.05em;
-  top: 52%;
-  height: 0.07em;
-  background: var(--red);
+  width: 0.45rem;
+  height: 0.45rem;
+  background: var(--acc);
 }
 
-.hero-sub {
-  max-width: 44rem;
-  margin: 0 0 2.5rem;
-  color: var(--ink-soft);
-  font-size: 0.875rem;
-  line-height: 1.6;
+.manifest-st.beta {
+  color: var(--t-3);
+}
+
+.manifest-st.beta::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--g-3);
+}
+
+/* Buttons invert with the ground they sit on */
+.hero .btn {
+  border-color: var(--t-1);
+  color: var(--t-1);
+  background: transparent;
+}
+
+.hero .btn-ink {
+  background: var(--t-1);
+  color: var(--g-0);
+}
+
+.hero .btn::before {
+  background: var(--acc);
+}
+
+.hero .btn-ink:hover {
+  background: var(--t-1);
+}
+
+.hero .btn-paper:hover {
+  background: transparent;
+}
+
+.hero .btn:hover {
+  color: var(--t-1);
+}
+
+.hero .btn-ink:hover {
+  color: var(--t-1);
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0;
+  margin-top: 2.4rem;
 }
 
 /* Buttons — mechanical blocks */
@@ -708,22 +887,11 @@ html:not([data-locale="ko"]) [data-l="ko"] {
 
 /* Hangul has no descenders to speak of and sets tighter — give the
    headline copy back the room the Latin metrics were holding. */
+/* Hangul sets tighter than the Latin metrics allow for. */
 html[data-locale="ko"] .hero h1 {
-  max-width: 16ch;
+  max-width: 18ch;
   letter-spacing: -0.01em;
-  /* Black Han Sans sets on a taller body than Archivo Black — 0.92 laps */
-  line-height: 1.08;
-}
-
-/* The word boxes clip for the press animation, so they need to be tall
-   enough for Hangul or the glyphs lose their top and bottom. */
-html[data-locale="ko"] .hero h1 .word {
-  padding: 0.24em 0.09em 0.24em;
-  margin: -0.24em -0.09em -0.24em;
-}
-
-html[data-locale="ko"] .hero h1 .strike::after {
-  top: 46%;
+  line-height: 1.12;
 }
 
 html[data-locale="ko"] .contact-left h2 {
@@ -731,7 +899,7 @@ html[data-locale="ko"] .contact-left h2 {
   letter-spacing: -0.01em;
 }
 
-html[data-locale="ko"] .hero-sub,
+html[data-locale="ko"] .manifest-blurb,
 html[data-locale="ko"] .product-desc,
 html[data-locale="ko"] .capability p,
 html[data-locale="ko"] .contact-left p,
@@ -985,38 +1153,19 @@ html:not([data-locale="ko"]) .lang-btn[data-set="en"] {
   transform: none;
 }
 
-/* --- Hero: words rise into the frame, rule strikes through --------- */
-.hero h1 .word {
-  display: inline-block;
-  overflow: hidden;
-  padding: 0.1em 0.09em 0.16em;
-  margin: -0.1em -0.09em -0.16em;
-  vertical-align: bottom;
+/* --- Hero: the manifest prints line by line ------------------------ */
+.hero.is-armed .manifest li {
+  clip-path: inset(0 100% 0 0);
 }
 
-.hero h1 .word-in {
-  display: inline-block;
-  transform: translate3d(0, 110%, 0);
-  animation: word-press 780ms var(--ease-press) forwards;
-  animation-delay: calc(var(--step, 0) * 90ms + 120ms);
+.hero.is-playing .manifest li {
+  animation: wipe-in 520ms var(--ease-press) forwards;
+  animation-delay: calc(var(--i) * 130ms + 700ms);
 }
 
-@keyframes word-press {
+@keyframes wipe-in {
   to {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-.hero h1 .strike::after {
-  transform: scaleX(0);
-  transform-origin: left center;
-  animation: rule-draw 420ms var(--ease-mech) forwards;
-  animation-delay: 720ms;
-}
-
-@keyframes rule-draw {
-  to {
-    transform: scaleX(1);
+    clip-path: inset(0 0 0 0);
   }
 }
 
@@ -1453,14 +1602,13 @@ html:not([data-locale="ko"]) .lang-btn[data-set="en"] {
     animation: none !important;
   }
 
-  .hero h1 .word-in {
-    transform: none !important;
+  .hero .manifest li {
+    clip-path: none !important;
     animation: none !important;
   }
 
-  .hero h1 .strike::after {
-    transform: scaleX(1) !important;
-    animation: none !important;
+  .hero.is-playing .reel-strip {
+    transition: none !important;
   }
 
   .caret,
