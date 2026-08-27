@@ -11,8 +11,9 @@
   --ink-soft: #333330;
   --mute: #6b6a66;
   --red: #e61919;
-  --font-macro: "Archivo Black", "Arial Black", sans-serif;
-  --font-mono: "JetBrains Mono", "Courier New", monospace;
+  --font-macro: "Archivo Black", "Black Han Sans", "Arial Black", sans-serif;
+  --font-mono: "JetBrains Mono", "Nanum Gothic Coding", "Courier New",
+    monospace;
 }
 
 * {
@@ -611,6 +612,133 @@ a {
     var(--paper) 8px,
     var(--paper) 16px
   );
+}
+
+/* ===================================================================
+ * LOCALE — both languages are in the DOM; only the inactive one is
+ * hidden, so the active element keeps whatever display it was given.
+ * The attribute is set before first paint (see LOCALE_BOOT in layout).
+ * =================================================================== */
+
+html[data-locale="ko"] [data-l="en"] {
+  display: none;
+}
+
+html:not([data-locale="ko"]) [data-l="ko"] {
+  display: none;
+}
+
+/* Black Han Sans and Nanum Gothic Coding ship one weight each, so a bold
+   heading makes the browser synthesise the rest — which smears an already
+   ultra-black face until the counters fill in solid. Take the real weight. */
+[lang="ko"] {
+  font-synthesis: none;
+}
+
+/* Hangul has no descenders to speak of and sets tighter — give the
+   headline copy back the room the Latin metrics were holding. */
+html[data-locale="ko"] .hero h1 {
+  max-width: 16ch;
+  letter-spacing: -0.01em;
+  /* Black Han Sans sets on a taller body than Archivo Black — 0.92 laps */
+  line-height: 1.08;
+}
+
+/* The word boxes clip for the press animation, so they need to be tall
+   enough for Hangul or the glyphs lose their top and bottom. */
+html[data-locale="ko"] .hero h1 .word {
+  padding: 0.24em 0.09em 0.24em;
+  margin: -0.24em -0.09em -0.24em;
+}
+
+html[data-locale="ko"] .hero h1 .strike::after {
+  top: 46%;
+}
+
+html[data-locale="ko"] .contact-left h2 {
+  max-width: 18ch;
+  letter-spacing: -0.01em;
+}
+
+html[data-locale="ko"] .hero-sub,
+html[data-locale="ko"] .product-desc,
+html[data-locale="ko"] .capability p,
+html[data-locale="ko"] .contact-left p,
+html[data-locale="ko"] .media-empty p {
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+/* Language switch — two cells in the masthead rail */
+.lang-toggle {
+  display: flex;
+  align-items: stretch;
+  border-left: 1px solid var(--ink);
+}
+
+.lang-btn {
+  appearance: none;
+  border: none;
+  border-left: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  padding: 0 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background 160ms var(--ease-mech), color 160ms var(--ease-mech);
+}
+
+.lang-toggle .lang-btn:first-child {
+  border-left: none;
+}
+
+.lang-btn:hover {
+  background: var(--paper-deep);
+}
+
+.lang-btn:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: -2px;
+}
+
+html[data-locale="ko"] .lang-btn[data-set="ko"],
+html:not([data-locale="ko"]) .lang-btn[data-set="en"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Brand, language, socials and the CTA do not fit one phone-width rail —
+   especially with a Korean CTA label — so the masthead becomes two rows. */
+@media (max-width: 34rem) {
+  .site-header-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .brand {
+    border-right: none;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .site-nav > *:first-child {
+    border-left: none;
+  }
+
+  .site-nav a.nav-cta {
+    flex: 1;
+    justify-content: center;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 26rem) {
+  .lang-btn {
+    padding: 0 0.5rem;
+    font-size: 0.62rem;
+  }
 }
 
 /* ===================================================================
