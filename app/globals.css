@@ -111,6 +111,7 @@ a {
   font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: -0.01em;
+  white-space: nowrap;
   border-right: 1px solid var(--ink);
 }
 
@@ -129,10 +130,12 @@ a {
 .site-nav a {
   display: flex;
   align-items: center;
-  padding: 0 1.25rem;
+  gap: 0.4rem;
+  padding: 0 0.85rem;
+  white-space: nowrap;
   text-decoration: none;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -159,7 +162,16 @@ a {
   outline-offset: -2px;
 }
 
-@media (max-width: 44rem) {
+/* The rail carries five links, a language switch, two socials and the CTA.
+   It is given up in stages rather than all at once: first the indices,
+   then the links themselves. */
+@media (max-width: 76rem) {
+  .nav-idx {
+    display: none;
+  }
+}
+
+@media (max-width: 60rem) {
   .site-nav .nav-link {
     display: none;
   }
@@ -647,13 +659,15 @@ a {
   background: var(--mute);
 }
 
-/* Capabilities — compartments */
+/* Capabilities — compartments.
+   Rules are drawn on the cells, not as gaps over an ink ground: the card
+   count is not a multiple of the column count, and a gap-based grid paints
+   the empty trailing cells solid black. */
 .capability-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--ink);
-  border-bottom: 2px solid var(--ink);
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink);
 }
 
 @media (max-width: 52rem) {
@@ -665,6 +679,54 @@ a {
 .capability {
   background: var(--paper);
   padding: 1.75rem 1.25rem 2.25rem;
+  border-right: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+.capability:nth-child(3n) {
+  border-right: none;
+}
+
+@media (max-width: 52rem) {
+  .capability {
+    border-right: none;
+  }
+}
+
+/* Where the work stops — stated plainly rather than left to be discovered. */
+.boundary {
+  padding: 1.75rem 1.25rem 2rem;
+  border-bottom: 2px solid var(--ink);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 11px,
+    rgba(10, 10, 10, 0.035) 11px,
+    rgba(10, 10, 10, 0.035) 12px
+  );
+}
+
+.boundary-label {
+  display: block;
+  color: var(--mute);
+  margin-bottom: 0.9rem;
+}
+
+.boundary-label .red {
+  color: var(--red);
+}
+
+.boundary p {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.75;
+}
+
+html[data-locale="ko"] .boundary p {
+  line-height: 1.85;
+  word-break: keep-all;
 }
 
 .capability-index {
@@ -689,6 +751,285 @@ a {
   color: var(--ink-soft);
   font-size: 0.78rem;
   line-height: 1.6;
+}
+
+/* ===================================================================
+ * SUBSCRIPTION — the offer, set as a spec sheet with the plan on a
+ * plate. The plate is the only other ink surface on the page after the
+ * hero, so the two bracket the sheet.
+ * =================================================================== */
+
+.sub-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  border-bottom: 2px solid var(--ink);
+}
+
+@media (max-width: 60rem) {
+  .sub-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sub-left {
+    border-right: none !important;
+    border-bottom: 1px solid var(--ink);
+  }
+}
+
+.sub-left {
+  padding: clamp(1.75rem, 4vw, 2.75rem) 1.25rem;
+  border-right: 1px solid var(--ink);
+}
+
+.sub-title {
+  font-family: var(--font-macro);
+  font-size: clamp(1.6rem, 4vw, 2.9rem);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin: 0 0 1.1rem;
+  max-width: 16ch;
+  text-wrap: balance;
+}
+
+.sub-lede {
+  margin: 0 0 2.25rem;
+  max-width: 46rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
+/* Terms of the arrangement */
+.prop-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem 1.25rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--ink);
+}
+
+@media (max-width: 44rem) {
+  .prop-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+.prop-index {
+  display: block;
+  color: var(--red);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.7rem;
+}
+
+.prop h4 {
+  font-family: var(--font-macro);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5rem;
+}
+
+.prop p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.65;
+}
+
+/* What the retainer stands in for */
+.replaces {
+  padding-top: 1.75rem;
+}
+
+.replaces-head {
+  display: block;
+  color: var(--mute);
+  margin-bottom: 1rem;
+}
+
+.replaces dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(9rem, auto) minmax(0, 1fr);
+  gap: 0.7rem 1.5rem;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 34rem) {
+  .replaces dl {
+    grid-template-columns: 1fr;
+    gap: 0.25rem 0;
+  }
+
+  .replaces dd {
+    margin-bottom: 0.8rem;
+  }
+}
+
+.replaces dt {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.replaces dd {
+  margin: 0;
+  color: var(--mute);
+  line-height: 1.6;
+}
+
+/* The plate */
+.sub-right {
+  padding: clamp(1.75rem, 4vw, 2.75rem) 1.25rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.plan {
+  width: 100%;
+  padding: 1.75rem 1.5rem 1.5rem;
+  background: var(--g-0);
+  color: var(--t-1);
+}
+
+.plan-index {
+  display: block;
+  color: var(--acc);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.5rem;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.plan-figure {
+  font-family: var(--font-macro);
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--t-1);
+}
+
+.plan-unit {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--t-2);
+}
+
+.plan-billing {
+  margin: 0.5rem 0 1.4rem;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--t-3);
+}
+
+.plan-list {
+  margin: 0 0 1.75rem;
+  padding: 1.25rem 0 0;
+  list-style: none;
+  border-top: 1px solid var(--g-3);
+}
+
+.plan-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.3rem 0;
+  color: var(--t-2);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+/* Same tick the stack specimen uses, so the two lists read as one system. */
+.plan-list li::before {
+  content: "";
+  flex: none;
+  width: 0.35rem;
+  height: 1px;
+  background: var(--acc);
+  transform: translateY(-0.2em);
+}
+
+.plan-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+  padding: 0.95rem 1.25rem;
+  border: 1px solid var(--t-1);
+  background: var(--t-1);
+  color: var(--g-0);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  transition: color 0ms linear 110ms;
+}
+
+.plan-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--acc);
+  transform: translate3d(0, 101%, 0);
+  transition: transform 210ms var(--ease-press);
+}
+
+.plan-cta:hover {
+  color: var(--t-1);
+}
+
+.plan-cta:hover::before {
+  transform: translate3d(0, 0, 0);
+}
+
+.plan-cta:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+.plan-cta:hover .arrow {
+  transform: translate3d(0.28em, 0, 0);
+}
+
+.plan-note {
+  margin: 1rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.6;
+  color: var(--t-3);
+}
+
+html[data-locale="ko"] .sub-lede,
+html[data-locale="ko"] .prop p,
+html[data-locale="ko"] .replaces dd,
+html[data-locale="ko"] .plan-note {
+  line-height: 1.8;
+  word-break: keep-all;
+}
+
+html[data-locale="ko"] .sub-title {
+  max-width: 20ch;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
 }
 
 /* Stack — specimen table.

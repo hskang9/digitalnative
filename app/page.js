@@ -1,3 +1,4 @@
+import React from "react";
 import LocaleToggle from "./locale-toggle";
 import ScrollReveal from "./motion";
 
@@ -67,16 +68,24 @@ function Header() {
 
         <nav className="site-nav">
           <a href="#products" className="nav-link">
-            <T en="01 / Products" ko="01 / 제품" />
+            <span className="nav-idx">01 /</span>
+            <T en="Products" ko="제품" />
           </a>
           <a href="#capabilities" className="nav-link">
-            <T en="02 / Capabilities" ko="02 / 역량" />
+            <span className="nav-idx">02 /</span>
+            <T en="Capabilities" ko="역량" />
+          </a>
+          <a href="#subscription" className="nav-link">
+            <span className="nav-idx">03 /</span>
+            <T en="Subscription" ko="구독" />
           </a>
           <a href="#stack" className="nav-link">
-            <T en="03 / Stack" ko="03 / 스택" />
+            <span className="nav-idx">04 /</span>
+            <T en="Stack" ko="스택" />
           </a>
           <a href="#media" className="nav-link">
-            <T en="04 / Media" ko="04 / 미디어" />
+            <span className="nav-idx">05 /</span>
+            <T en="Media" ko="미디어" />
           </a>
           <LocaleToggle />
           {SOCIALS.map((social) => (
@@ -464,7 +473,17 @@ const CAPABILITIES = [
     },
   },
   {
-    index: "UNIT / A-03",
+    index: "UNIT / S-03",
+    title: { en: "Scale", ko: "확장성" },
+    body: {
+      en:
+        "Backends built to hold ten thousand people online at once — queues, event streams, indexers, and websocket gateways, load-tested before they ever meet a crowd.",
+      ko:
+        "동시 접속 1만 명을 견디는 백엔드 — 큐, 이벤트 스트림, 인덱서, 웹소켓 게이트웨이를 부하 테스트까지 거쳐 만듭니다.",
+    },
+  },
+  {
+    index: "UNIT / A-04",
     title: { en: "AI integration", ko: "AI 통합" },
     body: {
       en:
@@ -505,6 +524,20 @@ function CapabilitiesSection() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Said out loud, because getting this wrong wastes everyone's time. */}
+      <div className="boundary" data-reveal data-reveal-step="0">
+        <span className="boundary-label mono-label">
+          <span className="red">///</span>{" "}
+          <T en="On design" ko="디자인에 대하여" />
+        </span>
+        <p>
+          <T
+            en="We are not a design studio, and we will not pretend to be one. Bring a design and a brand and we build the live product against it — and keep it standing when ten thousand people are on it at once. Don't have one yet? We can generate a starting point with AI and build from there. Either way the taste stays yours."
+            ko="저희는 디자인 스튜디오가 아니고, 그런 척하지도 않습니다. 디자인과 브랜드를 주시면 그에 맞춰 실제 서비스를 만들고, 동시 접속 1만 명이 몰려도 버티게 합니다. 아직 없으시다면 AI로 시안을 만들어 거기서부터 시작할 수 있습니다. 어느 쪽이든 최종 판단은 고객의 몫입니다."
+          />
+        </p>
       </div>
     </section>
   );
@@ -584,12 +617,189 @@ const STACK = [
   },
 ];
 
+const SUBSCRIPTION_CALL = "https://calendly.com/contact-digitalnative/30min";
+
+/** What the retainer is measured against. Qualitative on purpose — no
+ *  invented salary or agency figures. */
+const REPLACES = [
+  {
+    what: { en: "A senior hire", ko: "정규직 채용" },
+    why: {
+      en: "A recruiting cycle, equity, a notice period — and it is hard to unwind when the need changes.",
+      ko: "채용 절차, 지분, 퇴사 통보 기간. 필요가 바뀌면 되돌리기 어렵습니다.",
+    },
+  },
+  {
+    what: { en: "An agency retainer", ko: "에이전시 리테이너" },
+    why: {
+      en: "Layers of account management, a scoped statement of work, and a change order for everything after it.",
+      ko: "여러 단계의 담당자, 범위 계약서, 그 뒤로는 변경마다 따라오는 추가 합의.",
+    },
+  },
+  {
+    what: { en: "Freelancers", ko: "프리랜서" },
+    why: {
+      en: "Availability and quality that move around — and the integration work still lands on you.",
+      ko: "가용성과 품질이 매번 달라지고, 통합 작업은 결국 직접 해야 합니다.",
+    },
+  },
+];
+
+const PLAN_INCLUDES = [
+  { en: "One request at a time", ko: "한 번에 하나의 요청" },
+  { en: "Web, mobile, and AI integration", ko: "웹, 모바일, AI 통합" },
+  {
+    en: "You bring the design; we build and run it",
+    ko: "디자인은 주시면, 만들고 운영하는 건 저희가",
+  },
+  {
+    en: "Backends for 10,000+ concurrent users",
+    ko: "동시 접속 1만 명 이상 대응 백엔드",
+  },
+  { en: "Deployment and post-launch operations", ko: "배포와 출시 이후 운영" },
+  { en: "A direct line to the person building it", ko: "만드는 사람과 직접 소통" },
+  { en: "Pause or cancel anytime", ko: "언제든 일시정지 또는 해지" },
+];
+
+const PLAN_PROPS = [
+  {
+    index: "TERM / P-01",
+    title: { en: "Pause anytime", ko: "언제든 일시정지" },
+    body: {
+      en: "Stop the clock between projects. Unused days stay on the shelf until you come back.",
+      ko: "프로젝트 사이에는 시계를 멈춥니다. 남은 기간은 다시 돌아올 때까지 그대로 보관됩니다.",
+    },
+  },
+  {
+    index: "TERM / Q-02",
+    title: { en: "One queue", ko: "하나의 대기열" },
+    body: {
+      en: "Requests go to the people who built the products above — no account manager, no handoff.",
+      ko: "요청은 위 제품을 만든 사람에게 바로 갑니다. 계정 담당자도, 인수인계도 없습니다.",
+    },
+  },
+  {
+    index: "TERM / R-03",
+    title: { en: "Fixed rate", ko: "고정 요금" },
+    body: {
+      en: "One number, monthly. Scope can move without the paperwork that usually follows it.",
+      ko: "월 정액 하나. 범위가 바뀌어도 따라붙는 서류 작업은 없습니다.",
+    },
+  },
+];
+
+function SubscriptionSection() {
+  return (
+    <section id="subscription">
+      <div className="section-head">
+        <h2>
+          <span className="index">03</span>
+          <T en="[ Subscription ]" ko="[ 구독 ]" />
+        </h2>
+        <span className="aside">
+          <T en="One team, one queue" ko="한 팀, 하나의 대기열" />
+        </span>
+      </div>
+
+      <div className="sub-grid">
+        <div className="sub-left" data-reveal data-reveal-step="0">
+          <h3 className="sub-title">
+            <T
+              en="A development team, by the month."
+              ko="월 단위로 쓰는 개발팀."
+            />
+          </h3>
+          <p className="sub-lede">
+            <T
+              en="The same team that built and operates the five products above, on a flat monthly rate. One request at a time, worked to completion, then the next. No statement of work, no change orders, no hourly billing."
+              ko="위의 다섯 제품을 직접 만들고 운영하는 그 팀을 월 정액으로 씁니다. 한 번에 하나씩, 끝까지 마무리하고 다음으로 넘어갑니다. 범위 계약서도, 변경 요청서도, 시간당 청구도 없습니다."
+            />
+          </p>
+
+          <div className="prop-grid">
+            {PLAN_PROPS.map((prop) => (
+              <div className="prop" key={prop.index}>
+                <span className="prop-index">{prop.index}</span>
+                <h4>
+                  <T en={prop.title.en} ko={prop.title.ko} />
+                </h4>
+                <p>
+                  <T en={prop.body.en} ko={prop.body.ko} />
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="replaces">
+            <span className="replaces-head mono-label">
+              <T en="What it stands in for" ko="무엇을 대신하는가" />
+            </span>
+            <dl>
+              {REPLACES.map((row) => (
+                <React.Fragment key={row.what.en}>
+                  <dt>
+                    <T en={row.what.en} ko={row.what.ko} />
+                  </dt>
+                  <dd>
+                    <T en={row.why.en} ko={row.why.ko} />
+                  </dd>
+                </React.Fragment>
+              ))}
+            </dl>
+          </div>
+        </div>
+
+        <div className="sub-right" data-reveal data-reveal-step="1">
+          <div className="plan">
+            <span className="plan-index">PLAN / DN-SUB-01</span>
+
+            <p className="plan-price">
+              <span className="plan-figure">$5,000</span>
+              <span className="plan-unit">
+                <T en="/ month" ko="/ 월" />
+              </span>
+            </p>
+            <p className="plan-billing">
+              <T en="USD, billed monthly" ko="USD, 월 청구" />
+            </p>
+
+            <ul className="plan-list">
+              {PLAN_INCLUDES.map((item) => (
+                <li key={item.en}>
+                  <T en={item.en} ko={item.ko} />
+                </li>
+              ))}
+            </ul>
+
+            <a
+              className="plan-cta"
+              href={SUBSCRIPTION_CALL}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <T en="Book a 30-minute call" ko="30분 미팅 예약" />{" "}
+              <span className="arrow">→</span>
+            </a>
+
+            <p className="plan-note">
+              <T
+                en="Fit, cadence, and the first request get settled on the call."
+                ko="적합 여부와 진행 속도, 첫 요청은 통화에서 정합니다."
+              />
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function StackSection() {
   return (
     <section id="stack">
       <div className="section-head">
         <h2>
-          <span className="index">03</span>
+          <span className="index">04</span>
           <T en="[ Stack ]" ko="[ 기술 스택 ]" />
         </h2>
         <span className="aside">
@@ -722,7 +932,7 @@ function MediaSection() {
     <section id="media">
       <div className="section-head">
         <h2>
-          <span className="index">04</span>
+          <span className="index">05</span>
           <T en="[ Media & appearances ]" ko="[ 미디어 & 출연 ]" />
         </h2>
         <span className="aside">
@@ -810,6 +1020,14 @@ function ContactSection() {
             <T en="Start a conversation" ko="대화 시작하기" />{" "}
             <span className="arrow">→</span>
           </a>
+          <a
+            className="btn btn-paper"
+            href={SUBSCRIPTION_CALL}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <T en="Book a call" ko="미팅 예약" />
+          </a>
         </div>
       </div>
     </section>
@@ -863,6 +1081,7 @@ export default function HomePage() {
         <HeroSection />
         <ProductsSection />
         <CapabilitiesSection />
+        <SubscriptionSection />
         <StackSection />
         <MediaSection />
         <ContactSection />
