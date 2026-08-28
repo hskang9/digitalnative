@@ -113,8 +113,8 @@ function Header() {
         </span>
         <span>
           <T
-            en="REGISTERED SOFTWARE DEVELOPMENT FIRM"
-            ko="등록 소프트웨어 개발 기업"
+            en="AI-NATIVE SOFTWARE DEVELOPMENT FIRM"
+            ko="AI 네이티브 소프트웨어 개발 기업"
           />
         </span>
         <span>© 2026</span>
@@ -679,7 +679,17 @@ const PLAN_PROPS = [
     },
   },
   {
-    index: "TERM / R-03",
+    index: "TERM / A-03",
+    title: { en: "Built with AI", ko: "AI로 만듭니다" },
+    body: {
+      en:
+        "Claude Code and model tooling run through the whole build, not just the demo. Fewer people, less time, and a rate an agency cannot reach.",
+      ko:
+        "데모용이 아니라 개발 전 과정에 Claude Code와 모델 도구를 씁니다. 더 적은 인원, 더 짧은 시간, 에이전시가 맞출 수 없는 요금.",
+    },
+  },
+  {
+    index: "TERM / R-04",
     title: { en: "Fixed rate", ko: "고정 요금" },
     body: {
       en: "One number, monthly. Scope can move without the paperwork that usually follows it.",
@@ -711,8 +721,8 @@ function SubscriptionSection() {
           </h3>
           <p className="sub-lede">
             <T
-              en="The same team that built and operates the five products above, on a flat monthly rate. One request at a time, worked to completion, then the next. No statement of work, no change orders, no hourly billing."
-              ko="위의 다섯 제품을 직접 만들고 운영하는 그 팀을 월 정액으로 씁니다. 한 번에 하나씩, 끝까지 마무리하고 다음으로 넘어갑니다. 범위 계약서도, 변경 요청서도, 시간당 청구도 없습니다."
+              en="The same team that built and operates the five products above, on a flat monthly rate. We build with AI through the whole job — that is where the speed comes from, and why the rate sits well under an agency retainer. One request at a time, worked to completion, then the next. No statement of work, no change orders, no hourly billing."
+              ko="위의 다섯 제품을 직접 만들고 운영하는 그 팀을 월 정액으로 씁니다. 개발 전 과정에 AI를 씁니다. 속도가 거기서 나오고, 그래서 요금도 에이전시 리테이너보다 한참 아래입니다. 한 번에 하나씩 끝까지 마무리하고 다음으로 넘어갑니다. 범위 계약서도, 변경 요청서도, 시간당 청구도 없습니다."
             />
           </p>
 

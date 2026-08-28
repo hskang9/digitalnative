@@ -1,16 +1,16 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Digital Native — software development firm",
+  title: "Digital Native — AI-native software development firm",
   description:
-    "Digital Native is a registered software development firm. We build and operate consumer AI products — Imagine, an AI image and video app, and JobClaw, an AI portfolio for developers — and take on select client work.",
+    "An AI-native software development firm. We build with AI end to end — that is where the speed comes from, and why the rate sits well under an agency retainer. Five live products of our own. Subscriptions from $5,000/month.",
   icons: {
     icon: [{ url: "/favicon.png", type: "image/png" }],
   },
   openGraph: {
-    title: "Digital Native — software development firm",
+    title: "Digital Native — AI-native software development firm",
     description:
-      "We build and operate consumer AI products: Imagine (AI image & video) and JobClaw (AI developer portfolios).",
+      "An AI-native software development firm. We build with AI end to end — faster, and well under agency rates. Five live products of our own, from $5,000/month.",
     type: "website",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
