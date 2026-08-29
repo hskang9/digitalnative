@@ -325,6 +325,27 @@ const PRODUCTS = [
     status: "Beta",
   },
   {
+    name: "Plateful",
+    short: {
+      en: "Nutrition labels from a photo",
+      ko: "사진으로 만드는 영양 정보",
+    },
+    logo: "/logos/plateful.png",
+    meta: {
+      en: "Mobile / AI nutrition tracking / Expo · FastAPI · Railway · Stripe",
+      ko: "모바일 / AI 영양 분석 / Expo · FastAPI · Railway · Stripe",
+    },
+    desc: {
+      en:
+        "Photograph a meal and a vision model separates the plate into items, estimates each portion, and returns calories and macros for each one. Everything logs against a daily target computed from your height, weight and goal, and a coach model reads a stretch of the log and writes it up.",
+      ko:
+        "식사를 찍으면 비전 모델이 접시를 음식별로 나누고, 양을 추정해 각각의 칼로리와 영양소를 돌려줍니다. 키·체중·목표로 계산한 하루 목표치에 자동으로 기록되고, 코치 모델이 일정 기간의 기록을 읽고 정리해 줍니다.",
+    },
+    // plateful.app is not deployed yet - no link until it resolves.
+    links: [],
+    status: "Beta",
+  },
+  {
     name: "Pensa",
     short: { en: "AI academic writing analysis", ko: "AI 학술 글쓰기 분석" },
     logo: "/logos/pensa.png",
@@ -397,19 +418,22 @@ function ProductRow({ product, last }) {
             </figcaption>
           </figure>
         ) : null}
-        <div className="product-links">
-          {product.links.map((link) => (
-            <a
-              className="product-link"
-              href={link.href}
-              key={link.href}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
+        {/* A product can exist before its domain does. */}
+        {product.links.length ? (
+          <div className="product-links">
+            {product.links.map((link) => (
+              <a
+                className="product-link"
+                href={link.href}
+                key={link.href}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        ) : null}
       </div>
       <div
         className={`product-cell-status${rowEnd}`}
@@ -1052,7 +1076,7 @@ function Footer() {
         <T en="All rights reserved" ko="모든 권리 보유" />
       </span>
       <nav>
-        {PRODUCTS.map((product) => (
+        {PRODUCTS.filter((product) => product.links.length).map((product) => (
           <a
             href={product.links[0].href}
             key={product.name}
