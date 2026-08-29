@@ -213,11 +213,11 @@ function HeroSection() {
 
             <div className="hero-actions hero-step" style={{ "--step": 6 }}>
               <a href="#products" className="btn btn-ink">
-                <T en="See our products" ko="제품 보기" />{" "}
+                <T en="See the products" ko="제품 보기" />{" "}
                 <span className="arrow">&gt;&gt;&gt;</span>
               </a>
               <a href="#contact" className="btn btn-paper">
-                <T en="Work with us" ko="함께 일하기" />
+                <T en="Work with me" ko="함께 일하기" />
               </a>
             </div>
           </div>
@@ -534,8 +534,8 @@ function CapabilitiesSection() {
         </span>
         <p>
           <T
-            en="We are not a design studio, and we will not pretend to be one. Bring a design and a brand and we build the live product against it — and keep it standing when ten thousand people are on it at once. Don't have one yet? We can generate a starting point with AI and build from there. Either way the taste stays yours."
-            ko="저희는 디자인 스튜디오가 아니고, 그런 척하지도 않습니다. 디자인과 브랜드를 주시면 그에 맞춰 실제 서비스를 만들고, 동시 접속 1만 명이 몰려도 버티게 합니다. 아직 없으시다면 AI로 시안을 만들어 거기서부터 시작할 수 있습니다. 어느 쪽이든 최종 판단은 고객의 몫입니다."
+            en="This is not a design studio, and I will not pretend otherwise. Bring a design and a brand and I build the live product against it — and keep it standing when ten thousand people are on it at once. Don't have one yet? I can generate a starting point with AI and build from there. Either way the taste stays yours."
+            ko="디자인 스튜디오가 아닙니다. 그런 척하지도 않겠습니다. 디자인과 브랜드를 주시면 그에 맞춰 실제 서비스를 만들고, 동시 접속 1만 명이 몰려도 버티게 합니다. 아직 없으시다면 AI로 시안을 만들어 거기서부터 시작할 수 있습니다. 어느 쪽이든 최종 판단은 고객의 몫입니다."
           />
         </p>
       </div>
@@ -674,8 +674,8 @@ const PLAN_PROPS = [
     index: "TERM / Q-02",
     title: { en: "One queue", ko: "하나의 대기열" },
     body: {
-      en: "Requests go to the people who built the products above — no account manager, no handoff.",
-      ko: "요청은 위 제품을 만든 사람에게 바로 갑니다. 계정 담당자도, 인수인계도 없습니다.",
+      en: "Requests go to the person who built the products above — no account manager, no handoff, nobody to brief.",
+      ko: "요청은 위 제품을 만든 사람에게 바로 갑니다. 계정 담당자도, 인수인계도, 따로 설명할 상대도 없습니다.",
     },
   },
   {
@@ -707,7 +707,7 @@ function SubscriptionSection() {
           <T en="[ Subscription ]" ko="[ 구독 ]" />
         </h2>
         <span className="aside">
-          <T en="One team, one queue" ko="한 팀, 하나의 대기열" />
+          <T en="One person, one queue" ko="한 사람, 하나의 대기열" />
         </span>
       </div>
 
@@ -715,14 +715,14 @@ function SubscriptionSection() {
         <div className="sub-left" data-reveal data-reveal-step="0">
           <h3 className="sub-title">
             <T
-              en="A development team, by the month."
-              ko="월 단위로 쓰는 개발팀."
+              en="One engineer, by the month."
+              ko="월 단위로 쓰는 개발자 한 명."
             />
           </h3>
           <p className="sub-lede">
             <T
-              en="The same team that built and operates the five products above, on a flat monthly rate. We build with AI through the whole job — that is where the speed comes from, and why the rate sits well under an agency retainer. One request at a time, worked to completion, then the next. No statement of work, no change orders, no hourly billing."
-              ko="위의 다섯 제품을 직접 만들고 운영하는 그 팀을 월 정액으로 씁니다. 개발 전 과정에 AI를 씁니다. 속도가 거기서 나오고, 그래서 요금도 에이전시 리테이너보다 한참 아래입니다. 한 번에 하나씩 끝까지 마무리하고 다음으로 넘어갑니다. 범위 계약서도, 변경 요청서도, 시간당 청구도 없습니다."
+              en="The same person who built and operates the five products above, on a flat monthly rate. I build with AI through the whole job — that is where the speed comes from, and why the rate sits well under an agency retainer. One request at a time, worked to completion, then the next. No statement of work, no change orders, no hourly billing."
+              ko="위의 다섯 제품을 직접 만들고 운영하는 사람을 월 정액으로 씁니다. 개발 전 과정에 AI를 씁니다. 속도가 거기서 나오고, 그래서 요금도 에이전시 리테이너보다 한참 아래입니다. 한 번에 하나씩 끝까지 마무리하고 다음으로 넘어갑니다. 범위 계약서도, 변경 요청서도, 시간당 청구도 없습니다."
             />
           </p>
 
@@ -1000,7 +1000,7 @@ function ContactSection() {
         </h2>
         <p>
           <T
-            en="Tell us what you are trying to ship. We reply to every serious inquiry within two business days."
+            en="Tell me what you are trying to ship. I reply to every serious inquiry within two business days."
             ko="무엇을 출시하려는지 알려 주세요. 진지한 문의에는 영업일 기준 2일 안에 답장합니다."
           />
         </p>
