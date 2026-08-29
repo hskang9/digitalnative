@@ -341,7 +341,8 @@ const PRODUCTS = [
       ko:
         "식사를 찍으면 비전 모델이 접시를 음식별로 나누고, 양을 추정해 각각의 칼로리와 영양소를 돌려줍니다. 키·체중·목표로 계산한 하루 목표치에 자동으로 기록되고, 코치 모델이 일정 기간의 기록을 읽고 정리해 줍니다.",
     },
-    // plateful.app is not deployed yet - no link until it resolves.
+    // plateful.today is registered but not serving yet: no TLS, and HTTP
+    // returns 410. Add the link once it is deployed.
     links: [],
     status: "Beta",
   },
