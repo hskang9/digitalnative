@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildTourPath, resolveTourFrame, tourRoomOffset } from "../app/tour-path.mjs";
+import { buildTourPath, dampTourValue, resolveTourFrame, tourRoomOffset } from "../app/tour-path.mjs";
 
 const rooms = [1500, 320, 900, 200, 0, 440].map((overflow) => ({ overflow, scale: 1.2 }));
 const path = buildTourPath(1000, rooms);
@@ -44,4 +44,24 @@ test("out-of-range positions clamp safely, including empty Press content", () =>
   assert.equal(resolveTourFrame(path, Infinity).totalProgress, 1);
   assert.equal(resolveTourFrame(path, tourRoomOffset(path, 4)).scrollTop, 0);
   assert.equal(tourRoomOffset(path, -1), 0);
+});
+
+test("fast scrolling and skipped room boundaries never teleport the camera", () => {
+  let camera = 3;
+  for (const target of [9, 15, -12, 30]) {
+    const next = dampTourValue(camera, target, 1 / 60);
+    assert.ok(Math.abs(next - camera) < Math.abs(target - camera) * 0.2);
+    assert.notEqual(next, target);
+    camera = next;
+  }
+});
+
+test("camera damping is frame-rate independent and settles for reading", () => {
+  let fast = 0, slow = 0;
+  for (let i = 0; i < 30; i++) fast = dampTourValue(fast, 20, 1 / 60);
+  for (let i = 0; i < 15; i++) slow = dampTourValue(slow, 20, 1 / 30);
+  assert.ok(Math.abs(fast - slow) < 0.00001);
+  for (let i = 0; i < 90; i++) fast = dampTourValue(fast, 20, 1 / 60);
+  assert.equal(fast, 20);
+  assert.equal(dampTourValue(20, 20, 1 / 60), 20);
 });

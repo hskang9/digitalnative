@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { CSS3DObject, CSS3DRenderer } from "three/addons/renderers/CSS3DRenderer.js";
 import { SPACES } from "./spaces";
+import { dampTourValue } from "./tour-path.mjs";
 
 // Original storybook architecture: real geometry, not a video background.
 export function createGarden(host, onFailure, onReady, onNavigate) {
@@ -136,7 +137,7 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
     const element = document.createElement("div"); element.className = "spatial-room-panel"; element.dataset.space = space.id;
     element.setAttribute("role", "region"); element.setAttribute("aria-label", `${space.en} / ${space.ko}`);
     element.inert = true; element.style.pointerEvents = "none";
-    const mount = document.createElement("div"); mount.className = "room-surface"; mount.tabIndex = 0;
+    const mount = document.createElement("div"); mount.className = "room-surface t-panel-slide"; mount.tabIndex = 0; mount.dataset.open = "false";
     mount.setAttribute("aria-label", `${space.en} content / ${space.ko} 내용`); element.appendChild(mount);
     const panel = new CSS3DObject(element); panel.position.set(x, y, z + 1.5); panel.scale.setScalar(0.009);
     panel.visible = false; contentScene.add(panel); roomPanels.push(panel); roomMounts.push(mount);
@@ -194,9 +195,12 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
   const preference = matchMedia("(prefers-reduced-motion: reduce)");
   let reduced = preference.matches, disposed = false, inView = true, dirty = true, painted = false, motionEnabled = true;
   let frame = 0, lastTime = 0, destination = 0, transition = null, golden = 0, goldenTarget = 0;
-  let tourFrame = null, tourMix = 0;
+  let tourFrame = null;
   const tourEyeFrom = new THREE.Vector3(), tourEyeTo = new THREE.Vector3();
   const tourGazeFrom = new THREE.Vector3(), tourGazeTo = new THREE.Vector3();
+  const tourEyeTarget = new THREE.Vector3(), tourGazeTarget = new THREE.Vector3();
+  const closeToken = getComputedStyle(host).getPropertyValue("--panel-close-dur").trim();
+  const panelCloseDuration = (parseFloat(closeToken) || 350) * (closeToken.endsWith("ms") ? 1 : closeToken.endsWith("s") ? 1000 : 1);
   let dragging = false, downX = 0, downY = 0, lastX = 0, lastY = 0;
   const look = { yaw: 0, pitch: 0 }, lookCurrent = { yaw: 0, pitch: 0 };
   const gaze = new THREE.Vector3(), euler = new THREE.Euler(0, 0, 0, "YXZ");
@@ -228,17 +232,24 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
     if (!dirty && time - lastTime < 32) { wake(); return; }
     const delta = Math.min((time - lastTime) / 1000 || 0, 0.1); lastTime = time;
     const ease = reduced ? 1 : 1 - Math.exp(-delta * 9);
+    const animated = motionEnabled && !reduced;
+    let cameraMoving = false;
     lookCurrent.yaw += (look.yaw - lookCurrent.yaw) * ease; lookCurrent.pitch += (look.pitch - lookCurrent.pitch) * ease;
     golden += (goldenTarget - golden) * ease;
     if (tourFrame && motionEnabled && !reduced) {
       transition = null;
       const travelling = tourFrame.type === "travel";
-      tourMix = travelling ? tourMix + (tourFrame.mix - tourMix) * ease : tourFrame.mix;
-      const smooth = tourMix * tourMix * tourMix * (tourMix * (tourMix * 6 - 15) + 10);
+      const mix = tourFrame.mix;
+      const smooth = mix * mix * mix * (mix * (mix * 6 - 15) + 10);
       pose(tourFrame.from, tourEyeFrom, tourGazeFrom); pose(tourFrame.to, tourEyeTo, tourGazeTo);
-      camera.position.lerpVectors(tourEyeFrom, tourEyeTo, smooth);
-      if (travelling) camera.position.z += Math.sin(Math.PI * smooth) * Math.min(4, tourEyeFrom.distanceTo(tourEyeTo) * 0.12);
-      gaze.lerpVectors(tourGazeFrom, tourGazeTo, smooth);
+      tourEyeTarget.lerpVectors(tourEyeFrom, tourEyeTo, smooth);
+      if (travelling) tourEyeTarget.z += Math.sin(Math.PI * smooth) * Math.min(4, tourEyeFrom.distanceTo(tourEyeTo) * 0.12);
+      tourGazeTarget.lerpVectors(tourGazeFrom, tourGazeTo, smooth);
+      for (const axis of ["x", "y", "z"]) {
+        camera.position[axis] = painted ? dampTourValue(camera.position[axis], tourEyeTarget[axis], delta) : tourEyeTarget[axis];
+        gaze[axis] = painted ? dampTourValue(gaze[axis], tourGazeTarget[axis], delta) : tourGazeTarget[axis];
+      }
+      cameraMoving = camera.position.distanceToSquared(tourEyeTarget) + gaze.distanceToSquared(tourGazeTarget) > 0.0001;
       destination = tourFrame.to;
       if (tourFrame.type === "read") roomMounts[tourFrame.room].scrollTop = tourFrame.scrollTop;
     } else if (transition && motionEnabled && !reduced) {
@@ -255,16 +266,26 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
     sun.color.copy(dayColor).lerp(eveningColor, golden); fill.intensity = 2 - golden * 0.5;
     const roomIndex = tourFrame ? (tourFrame.type === "read" ? tourFrame.room : -1) : destination < 1 ? -1 : Math.min(SPACES.length - 1, Math.floor(destination) - 1);
     roomPanels.forEach((panel, index) => {
-      const visible = index === roomIndex && !transition;
-      if (visible !== panel.visible) {
-        panel.visible = visible; panel.element.inert = !visible; panel.element.style.pointerEvents = visible ? "auto" : "none";
-        panel.element.setAttribute("aria-hidden", String(!visible));
-        if (!visible) panel.element.querySelectorAll("video").forEach((video) => video.pause());
+      const surface = roomMounts[index];
+      const arriving = index === roomIndex && !transition && !cameraMoving;
+      // Mount closed for one painted frame so the first arrival also animates.
+      const open = arriving && (panel.visible || !animated);
+      if ((surface.dataset.open === "true") !== open) {
+        surface.dataset.open = String(open);
+        panel.element.inert = !open; panel.element.style.pointerEvents = open ? "auto" : "none";
+        panel.element.setAttribute("aria-hidden", String(!open));
+        if (!open) {
+          panel.userData.hideAt = time + panelCloseDuration;
+          surface.querySelectorAll("video").forEach((video) => video.pause());
+        }
       }
+      // CSS3D must keep the departing surface mounted through its fade-out.
+      panel.visible = arriving || (animated && time < (panel.userData.hideAt || 0));
     });
     if (!reduced) ripples.forEach((ring, i) => { ring.material.opacity = 0.2 + Math.sin(time * 0.0007 + i) * 0.12; });
     renderer.render(scene, camera); contentRenderer.render(contentScene, camera);
-    host.dataset.cameraState = transition || tourFrame?.type === "travel" ? "moving" : "settled";
+    host.dataset.cameraState = transition || cameraMoving ? "moving" : "settled";
+    host.dataset.motionEnabled = String(animated);
     host.dataset.tourProgress = (tourFrame?.totalProgress || 0).toFixed(4);
     host.dataset.tourPhase = tourFrame?.type || "off";
     if (!painted) { painted = true; onReady(); }
@@ -318,7 +339,8 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
       const from = camera.position.clone(), fromGaze = gaze.clone(); destination = THREE.MathUtils.clamp(value, 0, SPACES.length + 0.7);
       const to = new THREE.Vector3(), toGaze = new THREE.Vector3(); pose(destination, to, toGaze);
       const distance = from.distanceTo(to); look.yaw = look.pitch = lookCurrent.yaw = lookCurrent.pitch = 0;
-      transition = painted && motionEnabled && !reduced && distance > 0.01 ? { from, to, fromGaze, toGaze, start: performance.now(), duration: distance < 8 ? 650 : 950, arc: Math.min(4, distance * 0.12) } : null;
+      const exitDelay = roomMounts.some((surface) => surface.dataset.open === "true") ? panelCloseDuration : 0;
+      transition = painted && motionEnabled && !reduced && distance > 0.01 ? { from, to, fromGaze, toGaze, start: performance.now() + exitDelay, duration: distance < 8 ? 650 : 950, arc: Math.min(4, distance * 0.12) } : null;
       invalidate();
   }
   resize();
@@ -344,7 +366,6 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
     setTourFrame(next) {
       if (!motionEnabled || reduced) return;
       if (!tourFrame || tourFrame.segmentIndex !== next.segmentIndex) {
-        tourMix = next.mix;
         look.yaw = look.pitch = lookCurrent.yaw = lookCurrent.pitch = 0;
       }
       tourFrame = next; transition = null;

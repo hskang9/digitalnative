@@ -1,5 +1,11 @@
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
+// Follow the rendered pose, not a segment-local mix that resets at boundaries.
+export function dampTourValue(current, target, delta) {
+  if (Math.abs(target - current) < 0.002) return target;
+  return current + (target - current) * (1 - Math.exp(-Math.max(0, delta) * 12));
+}
+
 // One native scrollbar: garden, camera travel, then a stationary reading pause.
 // Reading distance scales with actual content, including the last contact/footer.
 export function buildTourPath(viewportHeight, rooms) {

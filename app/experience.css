@@ -1,4 +1,40 @@
 /* Full-screen architecture; camera travel is explicit, reading is native. */
+:root {
+  --panel-open-dur: 400ms;
+  --panel-close-dur: 350ms;
+  --panel-translate-y: 100px;
+  --panel-blur: 2px;
+  --panel-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.t-panel-slide {
+  transform: translateY(var(--panel-translate-y));
+  opacity: 0;
+  filter: blur(var(--panel-blur));
+  pointer-events: none;
+  transition:
+    transform var(--panel-close-dur) var(--panel-ease),
+    opacity   var(--panel-close-dur) var(--panel-ease),
+    filter    var(--panel-close-dur) var(--panel-ease);
+  will-change: transform, opacity, filter;
+}
+.t-panel-slide[data-open="true"] {
+  transform: translateY(0);
+  opacity: 1;
+  filter: blur(0);
+  pointer-events: auto;
+  transition:
+    transform var(--panel-open-dur) var(--panel-ease),
+    opacity   var(--panel-open-dur) var(--panel-ease),
+    filter    var(--panel-open-dur) var(--panel-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-panel-slide { transition: none !important; }
+}
+
+.experience-viewport[data-motion-enabled="false"] .t-panel-slide { transition: none !important; }
+.room-surface.t-panel-slide { --panel-translate-y: 12px; }
 .frame { max-width: none; }
 .site-header { position: fixed; top: 0; left: 0; width: 100%; color: #f0f2e9; }
 .site-header-inner { border-bottom-color: #e5ebdd33; }
@@ -64,8 +100,8 @@ body:has(.experience[data-ready="false"]) .site-header { position: absolute; }
 .experience[data-scroll-tour="true"] .experience-stage { position: sticky; top: 0; }
 .experience[data-scroll-tour="true"] .room-surface { overflow: hidden; overscroll-behavior: auto; }
 .spatial-content-renderer { position: absolute; inset: 0; pointer-events: none; }
-.spatial-room-panel { background: var(--paper); color: var(--ink); box-shadow: 0 0 0 7px #d8bd80, 0 0 0 9px #63543b; backface-visibility: hidden; }
-.room-surface { height: 100%; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #80936b #e6dec3; cursor: auto; user-select: text; background: var(--paper); }
+.spatial-room-panel { color: var(--ink); backface-visibility: hidden; }
+.room-surface { height: 100%; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #80936b #e6dec3; cursor: auto; user-select: text; background: var(--paper); box-shadow: 0 0 0 7px #d8bd80, 0 0 0 9px #63543b; }
 .room-surface:focus-visible { outline: 2px solid var(--moss); outline-offset: -4px; }
 .room-surface > section, .room-surface > .contact-space > section { padding: 35px; }
 .room-surface .section-head { margin-bottom: 25px; gap: 20px; }
