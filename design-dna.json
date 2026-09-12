@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "name": "Digital Native — illustrated forest studio",
+    "description": "Inferred from the supplied video, adapted to real Three.js architecture. Values are local implementation choices, not verified source-code tokens.",
+    "source_references": ["https://x.com/BenjaminUIX/status/2098040954100064462"],
+    "created_at": "2026-09-11"
+  },
+  "design_system": {
+    "color": {
+      "palette_type": "complementary",
+      "primary": {"hex": "#092f35", "role": "forest atmosphere"},
+      "secondary": {"hex": "#e6b55a", "role": "sunlit architecture"},
+      "accent": {"hex": "#f3ddb1", "role": "calls to action"},
+      "neutral": {"scale": ["#fcf7e9", "#f6efda", "#d8cfb5", "#65705c", "#193e3d"], "usage": "parchment reading surfaces, dark ink, fine dividers"},
+      "semantic": {"success": "#687643", "warning": "#b9663d", "error": "#a14e35", "info": "#237a79"},
+      "surface": {"background": "#092f35", "card": "#f6efda", "elevated": "#fcf7e9"},
+      "contrast_strategy": "cream on deep teal in the hero; dark ink on opaque parchment when reading"
+    },
+    "typography": {
+      "type_scale": {
+        "display": {"size": "clamp(3.4rem,5.8vw,7rem)", "weight": 400, "line_height": 0.98, "tracking": "-0.045em"},
+        "heading_1": {"size": "3rem", "weight": 400, "line_height": 1.1, "tracking": "-0.04em"},
+        "heading_2": {"size": "2.2rem", "weight": 500, "line_height": 1.15, "tracking": "-0.04em"},
+        "heading_3": {"size": "1.4rem", "weight": 500, "line_height": 1.3, "tracking": "-0.03em"},
+        "body": {"size": "0.9rem", "weight": 400, "line_height": 1.7, "tracking": "normal"},
+        "body_small": {"size": "0.8rem", "weight": 400, "line_height": 1.75, "tracking": "normal"},
+        "caption": {"size": "0.65rem", "weight": 400, "line_height": 1.6, "tracking": "normal"},
+        "overline": {"size": "0.57rem", "weight": 400, "line_height": 1.6, "tracking": "0.12em"}
+      },
+      "font_families": {"heading": "Cormorant Garamond; Noto Sans KR for Korean", "body": "Manrope, Noto Sans KR, sans-serif", "mono": "IBM Plex Mono, monospace"},
+      "font_style_notes": "Reference has narrow, high-contrast serif display. Exact family is unknown; local Cormorant is an interpretation. Korean uses a consistent sans family."
+    },
+    "spacing": {"base_unit": "4px", "scale": [4, 8, 12, 16, 20, 24, 32, 48, 64, 80], "content_density": "spacious hero, comfortable reading rooms", "section_rhythm": "one architectural destination per section"},
+    "layout": {"grid_system": "asymmetric scene left, editorial copy right", "max_content_width": "850px room surfaces", "columns": "58% visual / 37% copy with outer margins", "gutter": "24px", "breakpoints": [360, 500, 699, 800, 1100, 1600], "alignment_tendency": "left-aligned editorial anchors"},
+    "shape": {"border_radius": {"small": "2px", "medium": "6px", "large": "14px", "pill": "999px"}, "border_usage": "subtle 1px UI borders; architectural frames", "divider_style": "warm parchment rules"},
+    "elevation": {"shadow_style": "minimal UI shadows; cel-shaded geometric depth", "levels": {"low": "none", "medium": "7px ochre frame", "high": "9px dark frame behind reading wall"}, "depth_cues": "perspective, foliage layers, warm foreground/cool background"},
+    "iconography": {"style": "fine geometric monogram and plain arrows", "stroke_weight": "1.5px", "size_scale": [14, 24, 30], "preferred_set": "existing local SVG icons"},
+    "motion": {"easing": "quintic smoothstep; exponential damping for optional scroll tour", "duration_scale": {"micro": "150ms", "normal": "300ms", "macro": "650–950ms"}, "entrance_pattern": "fully composed garden on first frame; explicit camera travel afterward", "exit_pattern": "reading surface hides during travel", "philosophy": "cinematic on request; optional saved scroll tour, off by default; room reading never moves the camera"},
+    "components": {"button_style": "small cream rectangular CTA and quiet text links", "input_style": "not present", "card_style": "opaque parchment walls framed by architecture", "navigation_pattern": "transparent header and persistent room controls", "modal_style": "not present", "list_style": "editorial product ledger with fine dividers", "component_notes": "Existing bilingual content, links, prices and video controls are retained. Journal is Press."
+    }
+  },
+  "design_style": {
+    "aesthetic": {"mood": ["warm", "immersive", "verdant", "quietly whimsical"], "visual_metaphor": "software as a living house of ideas", "era_influence": "storybook Mediterranean architecture", "genre": "illustrated creative studio", "personality_traits": ["thoughtful", "independent", "welcoming"], "adjectives": ["sunlit", "crafted", "layered"]},
+    "visual_language": {"complexity": "rich environment, minimal interface", "ornamentation": "arched windows, shutters, terracotta eaves, vines", "whitespace_usage": "a clear right-hand reading area within a dense forest", "visual_weight_distribution": "warm tower left; cream typography right", "focal_strategy": "single architectural hero", "contrast_level": "warm/cool separation with readable foreground", "texture_usage": "subtle procedural plaster grain and cel-shaded foliage"},
+    "composition": {"hierarchy_method": "scale contrast and warm/cool color separation", "balance_type": "asymmetric", "flow_direction": "tower to headline to room invitation", "grouping_strategy": "real sections inhabit individual storeys and wings", "negative_space_role": "quiet area for copy, without hiding the garden"},
+    "imagery": {"photo_treatment": "none", "illustration_style": "original cel-shaded 3D interpretation of a painterly reference", "graphic_elements": "cream monogram, thin frames, editorial serif", "pattern_usage": "roof tiles, shutter slats, pigment grain", "image_shape": "full-bleed environment"},
+    "interaction_feel": {"feedback_style": "active destination underline and immediate control state", "hover_behavior": "subtle color changes", "transition_personality": "short smooth glide, interruptible", "loading_style": "local illustrated tower until the first rendered frame", "microinteraction_density": "low"},
+    "brand_voice_in_ui": {"tone": "warm, direct", "formality": "professional but personal", "cta_style": "friendly invitation", "empty_state_approach": "truthful Press placeholder and contact route", "error_tone": "quiet fallback with all content accessible"}
+  },
+  "visual_effects": {
+    "overview": {"effect_intensity": "heavy-immersive", "performance_tier": "heavy", "fallback_strategy": "local tower illustration plus native document content", "primary_technology": "WebGL/Three.js with CSS3D HTML surfaces"},
+    "background_effects": {"type": "generative-art", "description": "layered teal tree grove behind an ochre tower", "technology": "Three.js instancing", "params": {"color_palette": ["#092f35", "#174b50", "#376e64"], "speed": "static camera at rest", "density": "dense grove", "opacity": 1, "blend_mode": "normal"}},
+    "particle_systems": {"enabled": false, "type": "none", "description": "not present", "technology": "none", "params": {"count": 0, "shape": "none", "size_range": [0, 0], "movement_pattern": "none", "color_behavior": "none", "interaction": "none", "spawn_area": "none"}},
+    "3d_elements": {"enabled": true, "type": "scene-bg", "description": "four-storey planted tower and two garden wings", "technology": "Three.js", "params": {"renderer": "WebGLRenderer, capped pixel ratio", "lighting": "hemisphere fill and warm directional sun", "camera": "perspective, full garden composed on first frame", "materials": "toon plaster, wood, teal roof, parchment", "geometry": "boxes, extruded arches, cones, instanced foliage", "post_processing": [], "interaction_model": "room selection, bounded drag look, keyboard arrows, Home reset"}},
+    "shader_effects": {"enabled": false, "type": "none", "description": "built-in toon shading only", "technology": "none", "params": {"uniforms": [], "vertex_manipulation": "none", "fragment_output": "built-in material output", "noise_type": "none", "distortion": "none"}},
+    "scroll_effects": {"parallax": {"enabled": true, "layers": "continuous 3D depth", "depth_range": "wide garden through all six architectural rooms", "speed_curve": "damped native scroll progress; optional toggle, disabled by default"}, "scroll_triggered_animations": {"enabled": true, "trigger_points": [], "animation_type": "three garden views, room-to-room camera travel, and stationary reading segments through the final Contact footer; trigger points adapt to viewport, language, and measured room content", "scrub_behavior": "one content-sized document scroll; no wheel cancellation, snapping, or nested scrolling; camera stays still while room content scrolls; reduced motion disables the tour"}, "scroll_morphing": {"enabled": false, "description": "no geometry morphing"}},
+    "text_effects": {"type": "none", "description": "stable readable text", "technology": "HTML/CSS", "params": {"split_strategy": "none", "animation_per_unit": "none", "stagger": "0ms", "effect_style": "none"}},
+    "cursor_effects": {"enabled": false, "type": "none", "description": "native cursor", "params": {"shape": "native", "size": "system", "blend_mode": "normal", "trail": "none", "interaction_zone": "scene background supports drag"}},
+    "image_effects": {"type": "none", "description": "existing product images retained", "technology": "HTML", "params": {"filter_pipeline": "none", "hover_transform": "none", "reveal_animation": "none", "distortion_type": "none"}},
+    "glassmorphism_neumorphism": {"enabled": false, "style": "none", "params": {"blur_radius": "0px", "transparency": 0, "border_treatment": "solid fine borders", "shadow_type": "none", "light_source_angle": "not applicable"}},
+    "canvas_drawings": {"enabled": true, "type": "pattern-fill", "description": "static generated plaster and architectural signage textures", "technology": "Canvas 2D", "params": {"draw_method": "seeded pigment marks and text", "animation_loop": "none", "color_scheme": "cream and ochre", "responsiveness": "GPU mapped to geometry", "interaction": "none"}},
+    "svg_animations": {"enabled": false, "type": "none", "description": "static original fallback tower and favicon", "params": {"animation_method": "none", "path_morphing": "none", "stroke_animation": "none", "filter_effects": "none"}},
+    "composite_notes": "The reference is a short animated illustration; its rendering technology cannot be determined from the video. The local adaptation intentionally uses original true 3D geometry so every section remains in the architecture. No external artwork is shipped. The garden needs no entrance interaction. Reduced motion disables camera animation; hidden/offscreen rendering pauses."
+  }
+}

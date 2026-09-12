@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "dev": "next dev",
     "build": "next build && cp .next/routes-manifest.json out/routes-manifest.json",
     "start": "npx --yes serve@14 out -l 3000"
   },
   "dependencies": {
-    "next": "latest",
+    "next": "16.3.4",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "three": "^0.186.0"
   }
 }

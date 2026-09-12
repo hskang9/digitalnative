@@ -1,16 +1,18 @@
 import "./globals.css";
+import "./experience.css";
 
 export const metadata = {
   title: "Digital Native — AI-native software development firm",
   description:
-    "A one-person, AI-native software development firm. I build with AI end to end — that is where the speed comes from, and why the rate sits well under an agency retainer. Five live products of my own. Subscriptions from $5,000/month.",
+    "Thoughtfully engineered software, from the first idea to the everyday. An independent practice building and operating AI-native products. Subscriptions from $5,000/month.",
   icons: {
-    icon: [{ url: "/favicon.png", type: "image/png" }],
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml", sizes: "any" }],
+    shortcut: "/favicon.svg",
   },
   openGraph: {
     title: "Digital Native — AI-native software development firm",
     description:
-      "A one-person, AI-native software development firm. I build with AI end to end — faster, and well under agency rates. Five live products of my own, from $5,000/month.",
+      "An independent practice building and operating AI-native products. Thoughtfully engineered software, from $5,000/month.",
     type: "website",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
@@ -40,7 +42,7 @@ d.setAttribute("data-locale",l);d.lang=l}catch(e){}})();`;
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" data-locale="en">
+    <html lang="en" data-locale="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOT }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -49,14 +51,8 @@ export default function RootLayout({ children }) {
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/*
-          Archivo Black + JetBrains Mono carry Latin; Black Han Sans and
-          Nanum Gothic Coding pick up Hangul per glyph. Google serves these
-          as unicode-range subsets, so an English visitor downloads none of
-          the Korean faces.
-        */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Black+Han+Sans&family=JetBrains+Mono:wght@400;500;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
         <noscript>

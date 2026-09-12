@@ -1,6 +1,7 @@
 import React from "react";
 import LocaleToggle from "./locale-toggle";
 import ScrollReveal from "./motion";
+import GardenScene from "./garden-scene";
 
 const CONTACT_EMAIL = "contact@digitalnative.vip";
 
@@ -62,62 +63,29 @@ function Header() {
   return (
     <header className="site-header">
       <div className="site-header-inner">
-        <a href="#" className="brand">
+        <a href="#" className="brand" aria-label="Digital Native home">
+          <svg className="brand-symbol" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5 27V5h9a11 11 0 0 1 0 22H5Z" stroke="currentColor" strokeWidth="1.5"/><path d="M11 27V11l15 16M11 11h15v16" stroke="currentColor" strokeWidth="1.5"/></svg>
           Digital Native<span className="brand-reg">®</span>
         </a>
 
         <nav className="site-nav">
           <a href="#products" className="nav-link">
-            <span className="nav-idx">01 /</span>
             <T en="Products" ko="제품" />
           </a>
           <a href="#capabilities" className="nav-link">
-            <span className="nav-idx">02 /</span>
-            <T en="Capabilities" ko="역량" />
+            <T en="The practice" ko="하는 일" />
           </a>
           <a href="#subscription" className="nav-link">
-            <span className="nav-idx">03 /</span>
-            <T en="Subscription" ko="구독" />
+            <T en="Work together" ko="함께하기" />
           </a>
-          <a href="#stack" className="nav-link">
-            <span className="nav-idx">04 /</span>
-            <T en="Stack" ko="스택" />
-          </a>
-          <a href="#media" className="nav-link">
-            <span className="nav-idx">05 /</span>
-            <T en="Media" ko="미디어" />
-          </a>
+          <a href="#stack" className="nav-link"><T en="Stack" ko="스택" /></a>
+          <a href="#media" className="nav-link"><T en="Press" ko="보도" /></a>
           <LocaleToggle />
-          {SOCIALS.map((social) => (
-            <a
-              aria-label={social.label}
-              className="nav-social"
-              href={social.href}
-              key={social.id}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <SocialIcon label={social.label} path={social.path} />
-            </a>
-          ))}
           <a href="#contact" className="nav-cta">
             <T en="Start a project" ko="프로젝트 시작" />{" "}
             <span className="arrow">→</span>
           </a>
         </nav>
-      </div>
-      <div className="doc-strip" aria-hidden="true">
-        <span>
-          DOC / DN-LANDING <span className="red">REV 3.0</span>
-          <span className="caret" />
-        </span>
-        <span>
-          <T
-            en="AI-NATIVE SOFTWARE DEVELOPMENT FIRM"
-            ko="AI 네이티브 소프트웨어 개발 기업"
-          />
-        </span>
-        <span>© 2026</span>
       </div>
     </header>
   );
@@ -128,104 +96,6 @@ const STATUS_LABELS = {
   Beta: { en: "Beta", ko: "베타" },
   Archived: { en: "Archived", ko: "아카이브" },
 };
-
-/** Archived work stays in the ledger below, but it is not in production. */
-const isShipping = (product) => product.status !== "Archived";
-
-function Odometer({ value }) {
-  const digits = String(value).padStart(2, "0").split("");
-
-  return (
-    <div className="reel-row" aria-label={String(value)}>
-      {digits.map((digit, i) => (
-        <span className="reel" key={i}>
-          {/* Rests on its final digit, so the count is right even if the
-              roll never plays. motion.js snaps it back to 0 first. */}
-          <span
-            className="reel-strip"
-            data-reel={digit}
-            style={{ transform: `translateY(-${Number(digit) * 10}%)` }}
-          >
-            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-              <i key={n}>{n}</i>
-            ))}
-          </span>
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function HeroSection() {
-  return (
-    <section className="hero" data-hero>
-      {/* Drifting press ink, screened to a halftone dot by CSS so the ground
-          reads as something printed rather than as a gradient. */}
-      <canvas className="hero-field" data-field aria-hidden="true" />
-
-      <div className="hero-inner">
-        <p className="hero-kicker mono-label hero-step" style={{ "--step": 0 }}>
-          <span className="mark">///</span>{" "}
-          <T
-            en="Consumer AI products, built and operated in-house"
-            ko="자체 개발하고 직접 운영하는 컨슈머 AI 제품"
-          />
-        </p>
-
-        <div className="hero-out">
-          <Odometer value={PRODUCTS.filter(isShipping).length} />
-
-          <div>
-            <h1>
-              <T en="Products in production." ko="운영 중인 제품." />
-            </h1>
-
-            <ul className="manifest">
-              {PRODUCTS.filter(isShipping).map((product, i) => {
-                const status = STATUS_LABELS[product.status];
-
-                return (
-                  <li key={product.name} style={{ "--i": i }}>
-                    <img
-                      alt=""
-                      className="manifest-logo"
-                      height="56"
-                      src={product.logo}
-                      width="56"
-                    />
-                    <span className="manifest-name">{product.name}</span>
-                    <span className="manifest-blurb">
-                      <T en={product.short.en} ko={product.short.ko} />
-                    </span>
-                    <span
-                      className={
-                        product.status === "Live"
-                          ? "manifest-st"
-                          : "manifest-st beta"
-                      }
-                    >
-                      <T en={status.en} ko={status.ko} />
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <div className="hero-actions hero-step" style={{ "--step": 6 }}>
-              <a href="#products" className="btn btn-ink">
-                <T en="See the products" ko="제품 보기" />{" "}
-                <span className="arrow">&gt;&gt;&gt;</span>
-              </a>
-              <a href="#contact" className="btn btn-paper">
-                <T en="Work with me" ko="함께 일하기" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 const PRODUCTS = [
   {
@@ -401,6 +271,7 @@ function ProductRow({ product, last }) {
         {product.video ? (
           <figure className="product-figure">
             <video
+              controls
               data-inview
               loop
               muted
@@ -453,11 +324,10 @@ function ProductsSection() {
     <section id="products">
       <div className="section-head">
         <h2>
-          <span className="index">01</span>
-          <T en="[ Products, in detail ]" ko="[ 제품 상세 ]" />
+          <T en="Ideas, out in the world." ko="아이디어가 세상으로." />
         </h2>
         <span className="aside">
-          <T en="Live systems — not mockups" ko="실제 서비스 — 목업 아님" />
+          <T en="Built, shipped, and cared for." ko="직접 만들고, 출시하고, 돌봅니다." />
         </span>
       </div>
 
@@ -522,8 +392,7 @@ function CapabilitiesSection() {
     <section id="capabilities">
       <div className="section-head">
         <h2>
-          <span className="index">02</span>
-          <T en="[ Capabilities ]" ko="[ 역량 ]" />
+          <T en="Strong foundations. Room to grow." ko="단단한 기반, 성장할 여유." />
         </h2>
         <span className="aside">
           <T en="Full lifecycle" ko="전 주기 대응" />
@@ -537,7 +406,7 @@ function CapabilitiesSection() {
                 rules with an ink ground, so fading the card itself would
                 expose a black block until it lands. */}
             <div className="capability-body" data-reveal data-reveal-step={i}>
-              <span className="capability-index">{capability.index}</span>
+              <span className={`capability-mark capability-mark-${i}`} aria-hidden="true" />
               <h3>
                 <T en={capability.title.en} ko={capability.title.ko} />
               </h3>
@@ -552,7 +421,6 @@ function CapabilitiesSection() {
       {/* Said out loud, because getting this wrong wastes everyone's time. */}
       <div className="boundary" data-reveal data-reveal-step="0">
         <span className="boundary-label mono-label">
-          <span className="red">///</span>{" "}
           <T en="On design" ko="디자인에 대하여" />
         </span>
         <p>
@@ -726,8 +594,7 @@ function SubscriptionSection() {
     <section id="subscription">
       <div className="section-head">
         <h2>
-          <span className="index">03</span>
-          <T en="[ Subscription ]" ko="[ 구독 ]" />
+          <T en="Good things take continuity." ko="좋은 제품은 꾸준함에서." />
         </h2>
         <span className="aside">
           <T en="One person, one queue" ko="한 사람, 하나의 대기열" />
@@ -744,15 +611,14 @@ function SubscriptionSection() {
           </h3>
           <p className="sub-lede">
             <T
-              en="The same person who built and operates the five products above, on a flat monthly rate. I build with AI through the whole job — that is where the speed comes from, and why the rate sits well under an agency retainer. One request at a time, worked to completion, then the next. No statement of work, no change orders, no hourly billing."
-              ko="위의 다섯 제품을 직접 만들고 운영하는 사람을 월 정액으로 씁니다. 개발 전 과정에 AI를 씁니다. 속도가 거기서 나오고, 그래서 요금도 에이전시 리테이너보다 한참 아래입니다. 한 번에 하나씩 끝까지 마무리하고 다음으로 넘어갑니다. 범위 계약서도, 변경 요청서도, 시간당 청구도 없습니다."
+              en="The same person who built and operates the products above, on a flat monthly rate. I build with AI through the whole job — that is where the speed comes from, and why the rate sits well under an agency retainer. One request at a time, worked to completion, then the next. No statement of work, no change orders, no hourly billing."
+              ko="위의 제품을 직접 만들고 운영하는 사람을 월 정액으로 씁니다. 개발 전 과정에 AI를 씁니다. 속도가 거기서 나오고, 그래서 요금도 에이전시 리테이너보다 한참 아래입니다. 한 번에 하나씩 끝까지 마무리하고 다음으로 넘어갑니다. 범위 계약서도, 변경 요청서도, 시간당 청구도 없습니다."
             />
           </p>
 
           <div className="prop-grid">
             {PLAN_PROPS.map((prop) => (
               <div className="prop" key={prop.index}>
-                <span className="prop-index">{prop.index}</span>
                 <h4>
                   <T en={prop.title.en} ko={prop.title.ko} />
                 </h4>
@@ -784,7 +650,7 @@ function SubscriptionSection() {
 
         <div className="sub-right" data-reveal data-reveal-step="1">
           <div className="plan">
-            <span className="plan-index">PLAN / DN-SUB-01</span>
+            <span className="plan-index"><T en="A dedicated partnership" ko="전담 개발 파트너십" /></span>
 
             <p className="plan-price">
               <span className="plan-figure">$5,000</span>
@@ -832,8 +698,7 @@ function StackSection() {
     <section id="stack">
       <div className="section-head">
         <h2>
-          <span className="index">04</span>
-          <T en="[ Stack ]" ko="[ 기술 스택 ]" />
+          <T en="Tools of the practice." ko="제품을 만드는 도구들." />
         </h2>
         <span className="aside">
           <T
@@ -849,7 +714,6 @@ function StackSection() {
             {/* Same reason as the capability cards: the grid paints its
                 rules with an ink ground, so the reveal sits inside. */}
             <div className="stack-body" data-reveal data-reveal-step={i}>
-              <span className="stack-index">{group.index}</span>
               <h3>
                 <T en={group.title.en} ko={group.title.ko} />
               </h3>
@@ -965,8 +829,7 @@ function MediaSection() {
     <section id="media">
       <div className="section-head">
         <h2>
-          <span className="index">05</span>
-          <T en="[ Media & appearances ]" ko="[ 미디어 & 출연 ]" />
+          <T en="In the press." ko="언론에 소개된 이야기." />
         </h2>
         <span className="aside">
           {count ? (
@@ -991,12 +854,6 @@ function MediaSection() {
         </div>
       ) : (
         <div className="media-empty" data-reveal data-reveal-step="0">
-          <span className="mono-label media-empty-file">
-            FILE / DN-MEDIA{" "}
-            <span className="red">
-              <T en="— 0 ENTRIES" ko="— 등록 0건" />
-            </span>
-          </span>
           <p>
             <T
               en="Interviews, podcasts, and press are logged here as they publish."
@@ -1017,9 +874,10 @@ function ContactSection() {
   return (
     <section id="contact" className="contact">
       <div className="contact-left" data-reveal data-reveal-step="0">
-        <h2 data-l="en">Have a product to build?</h2>
+        <p className="mono-label"><T en="The next thing starts with a conversation" ko="다음 제품의 시작은 대화입니다" /></p>
+        <h2 data-l="en">Let’s make<br />something <em>lasting.</em></h2>
         <h2 data-l="ko" lang="ko">
-          만들고 싶은 제품이 있나요?
+          함께 만들어요.<br /><em>오래갈 제품을.</em>
         </h2>
         <p>
           <T
@@ -1111,16 +969,17 @@ export default function HomePage() {
       <ScrollReveal />
       <Header />
       <main>
-        <HeroSection />
-        <ProductsSection />
-        <CapabilitiesSection />
-        <SubscriptionSection />
-        <StackSection />
-        <MediaSection />
-        <ContactSection />
-        <div className="hazard" aria-hidden="true" />
+        <section className="hero immersive-hero" aria-labelledby="hero-title">
+        <GardenScene>
+          <ProductsSection />
+          <CapabilitiesSection />
+          <SubscriptionSection />
+          <StackSection />
+          <MediaSection />
+          <div className="contact-space"><ContactSection /><Footer /></div>
+        </GardenScene>
+        </section>
       </main>
-      <Footer />
     </div>
   );
 }
