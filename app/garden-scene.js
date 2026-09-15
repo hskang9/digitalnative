@@ -4,6 +4,7 @@ import { Children, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { SPACES } from "./spaces";
 import { buildTourPath, resolveTourFrame, roomCameraStop, tourRoomOffset } from "./tour-path.mjs";
+import { sectionKeyAction } from "./section-navigation.mjs";
 
 function T({ en, ko }) {
   return <><span data-l="en">{en}</span><span data-l="ko" lang="ko">{ko}</span></>;
@@ -49,6 +50,7 @@ export default function GardenScene({ children }) {
   const tourPath = useRef(null);
   const currentSpace = useRef(-1);
   const currentView = useRef("overview");
+  const scrollTarget = useRef(null);
   const [ready, setReady] = useState(false);
   const [golden, setGolden] = useState(false);
   const [mounts, setMounts] = useState([]);
@@ -62,9 +64,14 @@ export default function GardenScene({ children }) {
   const tourActive = ready && scrollTour && cameraMotion && !reducedPreference;
 
   function travelToSpace(index, updateHash = true, view = "overview") {
+    scrollTarget.current = null;
     if (tourActiveRef.current && tourPath.current) {
       const top = journey.current.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: top + tourRoomOffset(tourPath.current, index, view), behavior: updateHash ? "smooth" : "instant" });
+      const destination = top + tourRoomOffset(tourPath.current, index, view);
+      // Rapid, separate key presses advance from the requested room, not from
+      // whichever room the smooth scroll is passing through at that instant.
+      scrollTarget.current = { room: index, view, top: destination };
+      window.scrollTo({ top: destination, behavior: updateHash ? "smooth" : "instant" });
     } else {
       if (world.current) window.scrollTo({ top: 0, behavior: "instant" });
       world.current?.goTo(roomCameraStop(index), view);
@@ -116,25 +123,65 @@ export default function GardenScene({ children }) {
       const index = SPACES.findIndex((space) => space.id === id);
       if (index !== -1 || !id || id === "garden") travelToSpace(index, false);
     }
+    function clearScrollTarget() { scrollTarget.current = null; }
+    function navigateByKey(event) {
+      if (!world.current || !host.current) return;
+      const bounds = host.current.getBoundingClientRect();
+      if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) return;
+      const target = event.target;
+      if (target !== document.body && target !== document.documentElement && !journey.current.contains(target) && !target.closest?.(".site-header")) return;
+      const current = scrollTarget.current?.room ?? currentSpace.current;
+      const action = sectionKeyAction(event, {
+        current, count: SPACES.length,
+        reading: (scrollTarget.current?.view ?? currentView.current) === "read",
+        hasSelection: window.getSelection()?.isCollapsed === false,
+      });
+      if (!action) {
+        if (["Home", "End", "PageUp", "PageDown", " ", "Escape"].includes(event.key)) clearScrollTarget();
+        return;
+      }
+      if (action.type === "read") {
+        clearScrollTarget();
+        // With the tour off, give the native scroll container focus after its
+        // summary CTA disappears. Do not override arrow scrolling or repeats.
+        if (!tourActiveRef.current && !target.closest?.(".room-surface")) {
+          host.current.querySelector('.room-surface[data-open="true"]')?.focus({ preventScroll: true });
+        }
+        return;
+      }
+      event.preventDefault();
+      if (action.room === current) return;
+      host.current.focus({ preventScroll: true });
+      travelToSpace(action.room);
+    }
     document.addEventListener("click", navigate);
+    document.addEventListener("keydown", navigateByKey);
+    document.addEventListener("pointerdown", clearScrollTarget);
+    window.addEventListener("wheel", clearScrollTarget, { passive: true });
+    window.addEventListener("touchstart", clearScrollTarget, { passive: true });
     window.addEventListener("hashchange", onHash);
     return () => {
       cancelled = true;
       preference.removeEventListener("change", onPreference);
       document.removeEventListener("click", navigate); window.removeEventListener("hashchange", onHash);
+      document.removeEventListener("keydown", navigateByKey);
+      document.removeEventListener("pointerdown", clearScrollTarget);
+      window.removeEventListener("wheel", clearScrollTarget);
+      window.removeEventListener("touchstart", clearScrollTarget);
       dispose?.(); world.current = null;
     };
   }, []);
 
   useEffect(() => {
     tourActiveRef.current = tourActive;
-    if (!tourActive) { world.current?.stopTour(); tourPath.current = null; return; }
+    if (!tourActive) { world.current?.stopTour(); tourPath.current = null; scrollTarget.current = null; return; }
     let raf = 0, measureRaf = 0, cancelled = false;
     const documentTop = () => journey.current.getBoundingClientRect().top + window.scrollY;
     function syncScroll() {
       raf = 0;
       if (cancelled || !tourActiveRef.current || !tourPath.current) return;
       const frame = resolveTourFrame(tourPath.current, window.scrollY - documentTop());
+      if (scrollTarget.current && Math.abs(window.scrollY - scrollTarget.current.top) < 2) scrollTarget.current = null;
       world.current?.setTourFrame(frame);
       journey.current.style.setProperty("--tour-progress", frame.totalProgress);
       currentSpace.current = frame.room;
@@ -145,6 +192,7 @@ export default function GardenScene({ children }) {
     function measurePath() {
       measureRaf = 0;
       if (cancelled || !world.current || !tourActiveRef.current) return;
+      scrollTarget.current = null;
       const previous = tourPath.current ? resolveTourFrame(tourPath.current, window.scrollY - documentTop()) : null;
       const next = buildTourPath(host.current.clientHeight, world.current.getTourMetrics());
       tourPath.current = next;
@@ -262,7 +310,7 @@ export default function GardenScene({ children }) {
         })}
 
         <div className="experience-bottom">
-          <p className="experience-hint"><span aria-hidden="true">{tourActive ? "↓" : "↗"}</span><T en={ready ? (tourActive ? (activeSpace < 0 ? "Scroll from the garden through every room" : activeView === "overview" ? "Keep scrolling to step inside this room" : "Keep scrolling to read, then continue to the next room") : activeSpace < 0 ? "Choose a room. Make yourself at home." : activeView === "overview" ? "Explore this room, or choose another." : "Scroll to read. Your view stays still.") : "A little world of ideas"} ko={ready ? (tourActive ? (activeSpace < 0 ? "스크롤로 정원부터 마지막 공간까지 둘러보세요." : activeView === "overview" ? "더 스크롤하면 이 공간의 상세 내용을 볼 수 있습니다." : "스크롤로 읽고, 다음 공간으로 이어가세요.") : activeSpace < 0 ? "공간을 골라 편하게 둘러보세요." : activeView === "overview" ? "이 공간을 더 살펴보거나, 다른 공간을 골라보세요." : "스크롤로 읽으세요. 시점은 움직이지 않습니다.") : "아이디어가 자라는 작은 세계"} /></p>
+          <p className="experience-hint"><span aria-hidden="true">{tourActive ? "↓" : "↗"}</span><T en={ready ? (tourActive ? (activeSpace < 0 ? "Scroll from the garden through every room" : activeView === "overview" ? "Keep scrolling to step inside this room" : "Keep scrolling to read, then continue to the next room") : activeSpace < 0 ? "Choose a room. Make yourself at home." : activeView === "overview" ? "Explore this room, or choose another." : "Scroll to read. Your view stays still.") : "A little world of ideas"} ko={ready ? (tourActive ? (activeSpace < 0 ? "스크롤로 정원부터 마지막 공간까지 둘러보세요." : activeView === "overview" ? "더 스크롤하면 이 공간의 상세 내용을 볼 수 있습니다." : "스크롤로 읽고, 다음 공간으로 이어가세요.") : activeSpace < 0 ? "공간을 골라 편하게 둘러보세요." : activeView === "overview" ? "이 공간을 더 살펴보거나, 다른 공간을 골라보세요." : "스크롤로 읽으세요. 시점은 움직이지 않습니다.") : "아이디어가 자라는 작은 세계"} /><span className="experience-keyboard-hint" hidden={!ready}><T en="← → Switch rooms" ko="← → 공간 이동" /></span></p>
           <div className="experience-chapters" role="group" aria-label="Garden journey / 정원 동선" hidden={!ready}>
             <button type="button" onClick={() => travelToSpace(-1)} aria-pressed={activeSpace < 0}><T en="Garden" ko="정원" /></button>
             {SPACES.map((space, i) => <button key={space.id} type="button" onClick={() => travelToSpace(i)} aria-pressed={activeSpace === i}><T en={space.en} ko={space.ko} /></button>)}
@@ -274,7 +322,7 @@ export default function GardenScene({ children }) {
           </div>
         </div>
         <div className="experience-progress" hidden={!tourActive} aria-hidden="true"><span /></div>
-        <p className="sr-only" id="experience-instructions"><T en="Scroll tour uses one page scrollbar from the garden through Products, Practice, Partnership, Stack, Press, and Contact. At each room the camera stays still until all content has scrolled past, then continues. Navigation jumps to a room in the same tour. Turn Scroll tour off for independent room scrolling, or turn Motion off for instant navigation. Reduced motion disables the tour. Browser Back and Forward restore chosen rooms." ko="스크롤 투어는 정원에서 제품, 역량, 구독, 기술, 보도, 연락까지 하나의 페이지 스크롤로 이어집니다. 각 공간의 내용을 모두 읽는 동안 카메라가 멈추고, 그다음 다음 공간으로 이동합니다. 메뉴로 원하는 공간에 바로 갈 수 있습니다. 스크롤 투어를 끄면 각 공간을 따로 스크롤하고, 모션을 끄면 즉시 이동합니다. 동작 줄이기 설정에서는 투어가 꺼집니다. 브라우저 뒤로가기와 앞으로가기로 선택한 공간을 다시 볼 수 있습니다." /></p>
+        <p className="sr-only" id="experience-instructions"><T en="Left and right arrow keys move to the previous and next room. Up and down do the same outside reading; while reading, they scroll the content. Each press moves one room without wrapping. Inputs, media controls, and text selection keep their own keyboard behavior. Scroll tour uses one page scrollbar from the garden through Products, Practice, Work together, Stack, Press, and Contact. At each room the camera stays still until all content has scrolled past, then continues. Navigation jumps to a room in the same tour. Turn Scroll tour off for independent room scrolling, or turn Motion off for instant navigation. Reduced motion disables the tour. Browser Back and Forward restore chosen rooms." ko="왼쪽과 오른쪽 방향키로 이전과 다음 공간으로 이동합니다. 위아래 방향키도 공간을 이동하지만, 상세 내용을 읽는 동안에는 내용을 스크롤합니다. 한 번 누를 때 한 공간씩 이동하며, 처음과 끝에서는 멈춥니다. 입력 필드, 미디어 컨트롤, 텍스트 선택은 원래 키보드 동작을 유지합니다. 스크롤 투어는 정원에서 제품, 역량, 함께 만들기, 기술, 보도, 연락까지 하나의 페이지 스크롤로 이어집니다. 각 공간의 내용을 모두 읽는 동안 카메라가 멈추고, 그다음 다음 공간으로 이동합니다. 메뉴로 원하는 공간에 바로 갈 수 있습니다. 스크롤 투어를 끄면 각 공간을 따로 스크롤하고, 모션을 끄면 즉시 이동합니다. 동작 줄이기 설정에서는 투어가 꺼집니다. 브라우저 뒤로가기와 앞으로가기로 선택한 공간을 다시 볼 수 있습니다." /></p>
       </div>
       {mounts.length ? panels.map((panel, index) => mounts[index] ? createPortal(panel, mounts[index], SPACES[index].id) : null) : <div className="spatial-fallback-content">{children}</div>}
     </div>

@@ -344,13 +344,11 @@ export function createGarden(host, onFailure, onReady, onNavigate, onSummary) {
     dragging = false;
   }
   function keyDown(event) {
-    if (tourFrame && ["ArrowUp", "ArrowDown", "Home"].includes(event.key)) return;
-    if (event.target.closest(".room-surface") || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home"].includes(event.key)) return;
+    // Arrow navigation belongs to GardenScene, shared with links and the tour.
+    // Keep only the focused scene's Home shortcut for resetting a dragged view.
+    if (event.key !== "Home" || event.target !== host || tourFrame || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     event.preventDefault();
-    if (event.key === "ArrowLeft") look.yaw += 0.04; if (event.key === "ArrowRight") look.yaw -= 0.04;
-    if (event.key === "ArrowUp") look.pitch += 0.04; if (event.key === "ArrowDown") look.pitch -= 0.04;
-    if (event.key === "Home") look.yaw = look.pitch = 0;
-    look.yaw = THREE.MathUtils.clamp(look.yaw, -0.25, 0.25); look.pitch = THREE.MathUtils.clamp(look.pitch, -0.18, 0.18); invalidate();
+    look.yaw = look.pitch = 0; invalidate();
   }
   function visibility() { if (document.hidden) { cancelAnimationFrame(frame); frame = 0; } else { lastTime = performance.now(); invalidate(); } }
   function motionChange() { reduced = preference.matches; transition = null; contentReadyAt = 0; invalidate(); }
