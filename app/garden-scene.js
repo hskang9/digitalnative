@@ -3,10 +3,42 @@
 import { Children, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { SPACES } from "./spaces";
-import { buildTourPath, resolveTourFrame, tourRoomOffset } from "./tour-path.mjs";
+import { buildTourPath, resolveTourFrame, roomCameraStop, tourRoomOffset } from "./tour-path.mjs";
 
 function T({ en, ko }) {
   return <><span data-l="en">{en}</span><span data-l="ko" lang="ko">{ko}</span></>;
+}
+
+function RoomSummary({ space, visible, interactive, opacity, scrollDriven, onOpen }) {
+  const element = useRef(null);
+  useEffect(() => {
+    const block = element.current;
+    block.classList.remove("is-hiding", "is-shown");
+    if (visible) {
+      // Commit the resting hidden state before replaying an interrupted arrival.
+      if (!scrollDriven) void block.offsetHeight;
+      block.classList.add("is-shown");
+    } else if (!scrollDriven) {
+      block.classList.add("is-hiding");
+      const timer = setTimeout(() => block.classList.remove("is-hiding"), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [visible, scrollDriven]);
+
+  return (
+    <section ref={element} className="room-summary t-panel-slide t-stagger" data-summary={space.id}
+      data-open={visible} style={{ "--tour-opacity": visible ? opacity : 0 }}
+      aria-labelledby={`summary-${space.id}`} aria-hidden={!visible} inert={!interactive}>
+      <p className="experience-eyebrow t-stagger-line t-stagger-line--1"><span className="living-dot" /><T en={space.en} ko={space.ko} /></p>
+      <h2 id={`summary-${space.id}`} className="t-stagger-line t-stagger-line--2"><T {...space.summary.title} /></h2>
+      <p className="experience-description t-stagger-line t-stagger-line--3"><T {...space.summary.body} /></p>
+      <div className="t-stagger-line t-stagger-line--4">
+        <button type="button" className="experience-enter" onClick={onOpen}>
+          <T {...space.summary.action} /><span aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </section>
+  );
 }
 
 export default function GardenScene({ children }) {
@@ -16,26 +48,29 @@ export default function GardenScene({ children }) {
   const tourActiveRef = useRef(false);
   const tourPath = useRef(null);
   const currentSpace = useRef(-1);
+  const currentView = useRef("overview");
   const [ready, setReady] = useState(false);
-  const [chapter, setChapter] = useState(0);
   const [golden, setGolden] = useState(false);
   const [mounts, setMounts] = useState([]);
   const [activeSpace, setActiveSpace] = useState(-1);
+  const [activeView, setActiveView] = useState("overview");
+  const [summary, setSummary] = useState({ room: -1, opacity: 0, interactive: false });
   const [cameraMotion, setCameraMotion] = useState(true);
   const [scrollTour, setScrollTour] = useState(false);
   const [reducedPreference, setReducedPreference] = useState(false);
   const panels = Children.toArray(children);
   const tourActive = ready && scrollTour && cameraMotion && !reducedPreference;
 
-  function travelToSpace(index, updateHash = true) {
+  function travelToSpace(index, updateHash = true, view = "overview") {
     if (tourActiveRef.current && tourPath.current) {
       const top = journey.current.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: top + tourRoomOffset(tourPath.current, index), behavior: updateHash ? "smooth" : "instant" });
+      window.scrollTo({ top: top + tourRoomOffset(tourPath.current, index, view), behavior: updateHash ? "smooth" : "instant" });
     } else {
       if (world.current) window.scrollTo({ top: 0, behavior: "instant" });
-      world.current?.goTo(index < 0 ? 0 : index + 1.08);
+      world.current?.goTo(roomCameraStop(index), view);
       currentSpace.current = index;
-      setActiveSpace(index); setChapter(index < 0 ? 0 : 3);
+      currentView.current = view;
+      setActiveSpace(index); setActiveView(view);
     }
     const hash = index < 0 ? "#garden" : `#${SPACES[index].id}`;
     if (updateHash && location.hash !== hash) history.pushState(null, "", hash);
@@ -57,7 +92,9 @@ export default function GardenScene({ children }) {
       if (cancelled || !host.current) return;
       const garden = createGarden(host.current, () => { world.current = null; setReady(false); setMounts([]); }, () => {
         if (!cancelled) setReady(true);
-      }, (id) => travelToSpace(SPACES.findIndex((space) => space.id === id)));
+      }, (id) => travelToSpace(SPACES.findIndex((space) => space.id === id)), (next) => {
+        if (!cancelled) setSummary(next);
+      });
       if (!garden) return;
       world.current = garden;
       dispose = garden.dispose;
@@ -101,7 +138,8 @@ export default function GardenScene({ children }) {
       world.current?.setTourFrame(frame);
       journey.current.style.setProperty("--tour-progress", frame.totalProgress);
       currentSpace.current = frame.room;
-      setActiveSpace(frame.room); setChapter(frame.chapter);
+      currentView.current = frame.type === "read" || frame.type === "reveal" ? "read" : "overview";
+      setActiveSpace(frame.room); setActiveView(currentView.current);
     }
     function queueScroll() { if (!raf) raf = requestAnimationFrame(syncScroll); }
     function measurePath() {
@@ -112,7 +150,7 @@ export default function GardenScene({ children }) {
       tourPath.current = next;
       journey.current.style.setProperty("--tour-height", `${next.distance + host.current.clientHeight}px`);
       // Resizing or switching languages keeps the same section and reading position.
-      const offset = previous ? next.segments[previous.segmentIndex].start + previous.progress * (next.segments[previous.segmentIndex].end - next.segments[previous.segmentIndex].start) : tourRoomOffset(next, currentSpace.current);
+      const offset = previous ? next.segments[previous.segmentIndex].start + previous.progress * (next.segments[previous.segmentIndex].end - next.segments[previous.segmentIndex].start) : tourRoomOffset(next, currentSpace.current, currentView.current);
       window.scrollTo({ top: documentTop() + offset, behavior: "instant" });
       syncScroll();
     }
@@ -151,16 +189,6 @@ export default function GardenScene({ children }) {
     };
   }, [tourActive]);
 
-  function travelTo(next) {
-    if (tourActive) {
-      const top = journey.current.getBoundingClientRect().top + window.scrollY;
-      const range = tourPath.current?.segments[0].end || 0;
-      window.scrollTo({ top: top + [0, 0.48, 0.92][next] * range, behavior: "smooth" });
-      return;
-    }
-    world.current?.goTo([0, 0.29, 0.55][next]);
-    setChapter(next); setActiveSpace(-1);
-  }
   function changeMotion() {
     const next = !cameraMotion;
     if (!next) {
@@ -194,7 +222,7 @@ export default function GardenScene({ children }) {
   }
 
   return (
-    <div className="experience" ref={journey} data-ready={ready} data-scroll-tour={tourActive} data-chapter={chapter} data-space={activeSpace < 0 ? "garden" : SPACES[activeSpace].id} data-light={golden ? "golden" : "day"}>
+    <div className="experience" ref={journey} data-ready={ready} data-scroll-tour={tourActive} data-view={activeView} data-motion={cameraMotion && !reducedPreference} data-space={activeSpace < 0 ? "garden" : SPACES[activeSpace].id} data-light={golden ? "golden" : "day"}>
       <div className="experience-stage">
         <div className="experience-viewport" ref={host} tabIndex={ready ? 0 : -1} role="group"
           aria-label="Explore the architectural garden / 건축 정원 둘러보기" aria-describedby="experience-instructions">
@@ -215,31 +243,26 @@ export default function GardenScene({ children }) {
         <div className="experience-shade" aria-hidden="true" />
         <div className="experience-meta"><span className="living-dot" /><T en={activeSpace < 0 ? "An independent software practice" : SPACES[activeSpace].sign} ko={activeSpace < 0 ? "독립적인 소프트웨어 개발 스튜디오" : SPACES[activeSpace].ko} /></div>
 
-        <div className="experience-copy experience-arrival" inert={chapter !== 0} aria-hidden={chapter !== 0}>
+        <div className="experience-copy experience-arrival" inert={activeSpace >= 0} aria-hidden={activeSpace >= 0}>
           <p className="experience-eyebrow"><span className="living-dot" /><T en="An independent software practice" ko="독립적인 소프트웨어 개발 스튜디오" /></p>
           <h1 id="hero-title"><span data-l="en">A more<br /><em>human</em> digital.</span><span data-l="ko" lang="ko">디지털에<br /><em>온기를</em> 더하다.</span></h1>
           <p className="experience-description"><T en="Thoughtful software. Living systems. An independent practice turning first ideas into everyday products." ko="깊이 생각한 소프트웨어. 살아 있는 시스템. 첫 아이디어를 일상의 제품으로 만듭니다." /></p>
           <div className="experience-actions">
             <a className="experience-enter" href="#products"><T en="Explore the work" ko="제품 둘러보기" /><span aria-hidden="true">↗</span></a>
-            <button type="button" className="experience-next" onClick={() => travelTo(1)} disabled={!ready}><T en="A closer look" ko="가까이 둘러보기" /><span aria-hidden="true">→</span></button>
           </div>
         </div>
 
-        <div className="experience-copy experience-court" inert={chapter !== 1} aria-hidden={chapter !== 1}>
-          <p className="experience-eyebrow"><T en="The living studio" ko="살아 있는 스튜디오" /></p>
-          <h2><span data-l="en">Clarity.<br />From the <em>ground up.</em></span><span data-l="ko" lang="ko">본질에 집중하고,<br /><em>기초부터 단단하게.</em></span></h2>
-          <p className="experience-description"><T en="One engineer, from architecture to launch. Every layer considered. Every detail connected." ko="설계부터 출시까지, 한 명의 개발자가. 모든 구조를 고민하고, 작은 디테일까지 연결합니다." /></p>
-          <button className="experience-next" type="button" onClick={() => travelTo(2)}><T en="Continue through the light" ko="빛을 따라 더 안으로" /><span aria-hidden="true">↓</span></button>
-        </div>
-
-        <div className="experience-copy experience-oculus" inert={chapter !== 2} aria-hidden={chapter !== 2}>
-          <p className="experience-eyebrow"><T en="The rooftop garden" ko="옥상 정원" /></p>
-          <h2><span data-l="en">Built to work.<br />Room to <em>grow.</em></span><span data-l="ko" lang="ko">제대로 작동하고,<br />자연스럽게 <em>자라도록.</em></span></h2>
-          <a className="experience-enter" href="#products"><T en="Meet the products" ko="만든 제품 만나보기" /><span aria-hidden="true">↗</span></a>
-        </div>
+        {SPACES.map((space, index) => {
+          const visible = ready && summary.room === index && summary.opacity > 0;
+          const interactive = visible && summary.interactive;
+          return (
+            <RoomSummary key={space.id} space={space} visible={visible} interactive={interactive}
+              opacity={summary.opacity} scrollDriven={tourActive} onOpen={() => travelToSpace(index, true, "read")} />
+          );
+        })}
 
         <div className="experience-bottom">
-          <p className="experience-hint"><span aria-hidden="true">{tourActive ? "↓" : "↗"}</span><T en={ready ? (tourActive ? (activeSpace < 0 ? "Scroll from the garden through every room" : "Keep scrolling to read, then continue to the next room") : activeSpace < 0 ? "Choose a room. Make yourself at home." : "Scroll to read. Your view stays still.") : "A little world of ideas"} ko={ready ? (tourActive ? (activeSpace < 0 ? "스크롤로 정원부터 마지막 공간까지 둘러보세요." : "스크롤로 읽고, 다음 공간으로 이어가세요.") : activeSpace < 0 ? "공간을 골라 편하게 둘러보세요." : "스크롤로 읽으세요. 시점은 움직이지 않습니다.") : "아이디어가 자라는 작은 세계"} /></p>
+          <p className="experience-hint"><span aria-hidden="true">{tourActive ? "↓" : "↗"}</span><T en={ready ? (tourActive ? (activeSpace < 0 ? "Scroll from the garden through every room" : activeView === "overview" ? "Keep scrolling to step inside this room" : "Keep scrolling to read, then continue to the next room") : activeSpace < 0 ? "Choose a room. Make yourself at home." : activeView === "overview" ? "Explore this room, or choose another." : "Scroll to read. Your view stays still.") : "A little world of ideas"} ko={ready ? (tourActive ? (activeSpace < 0 ? "스크롤로 정원부터 마지막 공간까지 둘러보세요." : activeView === "overview" ? "더 스크롤하면 이 공간의 상세 내용을 볼 수 있습니다." : "스크롤로 읽고, 다음 공간으로 이어가세요.") : activeSpace < 0 ? "공간을 골라 편하게 둘러보세요." : activeView === "overview" ? "이 공간을 더 살펴보거나, 다른 공간을 골라보세요." : "스크롤로 읽으세요. 시점은 움직이지 않습니다.") : "아이디어가 자라는 작은 세계"} /></p>
           <div className="experience-chapters" role="group" aria-label="Garden journey / 정원 동선" hidden={!ready}>
             <button type="button" onClick={() => travelToSpace(-1)} aria-pressed={activeSpace < 0}><T en="Garden" ko="정원" /></button>
             {SPACES.map((space, i) => <button key={space.id} type="button" onClick={() => travelToSpace(i)} aria-pressed={activeSpace === i}><T en={space.en} ko={space.ko} /></button>)}

@@ -1,10 +1,10 @@
 import * as THREE from "three";
-import { CSS3DObject, CSS3DRenderer } from "three/addons/renderers/CSS3DRenderer.js";
 import { SPACES } from "./spaces";
-import { dampTourValue } from "./tour-path.mjs";
+import { dampTourValue, resolveTourPanel, resolveTourSummary } from "./tour-path.mjs";
+import { cameraDuration, cameraEase, shouldRenderFrame } from "./motion.mjs";
 
 // Original storybook architecture: real geometry, not a video background.
-export function createGarden(host, onFailure, onReady, onNavigate) {
+export function createGarden(host, onFailure, onReady, onNavigate, onSummary) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "low-power" }); }
   catch { return null; }
@@ -17,12 +17,12 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, host.clientWidth < 700 ? 1.25 : 1.5));
   renderer.domElement.setAttribute("aria-hidden", "true");
   host.appendChild(renderer.domElement);
-  const contentScene = new THREE.Scene();
-  const contentRenderer = new CSS3DRenderer();
-  contentRenderer.domElement.className = "spatial-content-renderer";
-  host.appendChild(contentRenderer.domElement);
+  // Readable HTML sits beside the selected architecture, independent of depth.
+  const contentLayer = document.createElement("div");
+  contentLayer.className = "spatial-content-renderer";
+  host.appendChild(contentLayer);
   const roomPanels = [], roomMounts = [], destinations = [];
-  let panelWidth = 850, panelHeight = 560, narrow = host.clientWidth < 700;
+  let narrow = host.clientWidth < 700;
   let seed = 3819;
   const random = () => { seed = seed * 16807 % 2147483647; return (seed - 1) / 2147483646; };
   const gradient = keep(new THREE.DataTexture(new Uint8Array([90, 170, 225, 255]), 4, 1, THREE.RedFormat));
@@ -139,8 +139,9 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
     element.inert = true; element.style.pointerEvents = "none";
     const mount = document.createElement("div"); mount.className = "room-surface t-panel-slide"; mount.tabIndex = 0; mount.dataset.open = "false";
     mount.setAttribute("aria-label", `${space.en} content / ${space.ko} 내용`); element.appendChild(mount);
-    const panel = new CSS3DObject(element); panel.position.set(x, y, z + 1.5); panel.scale.setScalar(0.009);
-    panel.visible = false; contentScene.add(panel); roomPanels.push(panel); roomMounts.push(mount);
+    const panel = { element, position: new THREE.Vector3(x, y, z + 1.5), visible: false, userData: {} };
+    element.style.display = "none"; contentLayer.appendChild(element);
+    roomPanels.push(panel); roomMounts.push(mount);
   });
   box(2.2, 3.1, 2.4, -6.4, 25.5, -0.65, toon(0xe8b447, plaster)); windowAt(-6.4, 24, 0.59, model);
   const spire = mesh(keep(new THREE.ConeGeometry(2.15, 3.6, 4)), teal, -6.4, 28.8, -0.65, model, true); spire.rotation.y = Math.PI / 4;
@@ -196,6 +197,9 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
   let reduced = preference.matches, disposed = false, inView = true, dirty = true, painted = false, motionEnabled = true;
   let frame = 0, lastTime = 0, destination = 0, transition = null, golden = 0, goldenTarget = 0;
   let tourFrame = null;
+  let detailView = false, contentReadyAt = 0;
+  let cameraSettling = false;
+  let lastSummary = "";
   const tourEyeFrom = new THREE.Vector3(), tourEyeTo = new THREE.Vector3();
   const tourGazeFrom = new THREE.Vector3(), tourGazeTo = new THREE.Vector3();
   const tourEyeTarget = new THREE.Vector3(), tourGazeTarget = new THREE.Vector3();
@@ -208,42 +212,41 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
   function pose(value, eye, focus) {
     if (value < 1) {
       // The full planted tower is established on frame one, without a scroll gate.
-      const t = value / 0.6;
-      if (narrow) { eye.set(10 - t * 6, 18 + t * 4, 65 - t * 9); focus.set(-3, 14 + t * 5, 0); }
-      else { eye.set(17 - t * 11, 17 + t * 6, 51 - t * 12); focus.set(4.5 - t * 0.5, 14 + t * 6, 0); }
+      if (narrow) { eye.set(10, 18, 65); focus.set(-3, 14, 0); }
+      else { eye.set(17, 17, 51); focus.set(4.5, 14, 0); }
       return;
     }
     const index = Math.min(SPACES.length - 1, Math.floor(value) - 1); focus.copy(roomPanels[index].position);
-    const fov = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const distance = Math.max(panelHeight * 0.009 / (2 * fov * (narrow ? 0.59 : 0.66)), panelWidth * 0.009 / (2 * fov * camera.aspect * 0.84));
-    eye.copy(focus); eye.z += distance;
+    // This pose is shared by the summary and full UI: no in/out camera stops.
+    eye.copy(focus);
+    if (narrow) { eye.x += 7; eye.y += 5; eye.z += 30; focus.y -= 4.5; }
+    else { eye.x += 13; eye.y += 4.5; eye.z += 27; focus.x += 8; focus.y += 1; }
   }
   function wake() { if (!frame && !disposed && inView && !document.hidden) frame = requestAnimationFrame(draw); }
   function invalidate() { dirty = true; wake(); }
   function resize() {
     const { width, height } = host.getBoundingClientRect(); if (!width || !height) return;
     narrow = width < 700; camera.aspect = width / height; camera.fov = narrow ? 45 : 42; camera.updateProjectionMatrix();
-    panelWidth = Math.min(850, width * 0.87); panelHeight = Math.min(560, height * (narrow ? 0.58 : 0.64));
-    roomPanels.forEach((panel) => { panel.element.style.width = `${panelWidth}px`; panel.element.style.height = `${panelHeight}px`; });
-    renderer.setSize(width, height); contentRenderer.setSize(width, height); transition = null; invalidate();
+    renderer.setSize(width, height); transition = null; invalidate();
   }
   function draw(time) {
     frame = 0; if (disposed || !inView || document.hidden) return;
-    if (!dirty && time - lastTime < 32) { wake(); return; }
+    const active = Boolean(transition) || cameraSettling || dragging ||
+      Math.abs(look.yaw - lookCurrent.yaw) + Math.abs(look.pitch - lookCurrent.pitch) > 0.0001 ||
+      Math.abs(goldenTarget - golden) > 0.002;
+    if (!shouldRenderFrame(time - lastTime, active, dirty)) { wake(); return; }
     const delta = Math.min((time - lastTime) / 1000 || 0, 0.1); lastTime = time;
     const ease = reduced ? 1 : 1 - Math.exp(-delta * 9);
     const animated = motionEnabled && !reduced;
     let cameraMoving = false;
+    let travelProgress = 1;
     lookCurrent.yaw += (look.yaw - lookCurrent.yaw) * ease; lookCurrent.pitch += (look.pitch - lookCurrent.pitch) * ease;
     golden += (goldenTarget - golden) * ease;
     if (tourFrame && motionEnabled && !reduced) {
       transition = null;
-      const travelling = tourFrame.type === "travel";
-      const mix = tourFrame.mix;
-      const smooth = mix * mix * mix * (mix * (mix * 6 - 15) + 10);
+      const smooth = cameraEase(tourFrame.mix);
       pose(tourFrame.from, tourEyeFrom, tourGazeFrom); pose(tourFrame.to, tourEyeTo, tourGazeTo);
       tourEyeTarget.lerpVectors(tourEyeFrom, tourEyeTo, smooth);
-      if (travelling) tourEyeTarget.z += Math.sin(Math.PI * smooth) * Math.min(4, tourEyeFrom.distanceTo(tourEyeTo) * 0.12);
       tourGazeTarget.lerpVectors(tourGazeFrom, tourGazeTo, smooth);
       for (const axis of ["x", "y", "z"]) {
         camera.position[axis] = painted ? dampTourValue(camera.position[axis], tourEyeTarget[axis], delta) : tourEyeTarget[axis];
@@ -251,12 +254,11 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
       }
       cameraMoving = camera.position.distanceToSquared(tourEyeTarget) + gaze.distanceToSquared(tourGazeTarget) > 0.0001;
       destination = tourFrame.to;
-      if (tourFrame.type === "read") roomMounts[tourFrame.room].scrollTop = tourFrame.scrollTop;
     } else if (transition && motionEnabled && !reduced) {
       const t = THREE.MathUtils.clamp((time - transition.start) / transition.duration, 0, 1);
-      const smooth = t * t * t * (t * (t * 6 - 15) + 10);
+      travelProgress = t;
+      const smooth = cameraEase(t);
       camera.position.lerpVectors(transition.from, transition.to, smooth);
-      camera.position.z += Math.sin(Math.PI * smooth) * transition.arc;
       gaze.lerpVectors(transition.fromGaze, transition.toGaze, smooth); if (t === 1) transition = null;
     } else {
       transition = null;
@@ -264,10 +266,24 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
     }
     camera.lookAt(gaze); euler.setFromQuaternion(camera.quaternion); euler.y += lookCurrent.yaw; euler.x += lookCurrent.pitch; camera.quaternion.setFromEuler(euler);
     sun.color.copy(dayColor).lerp(eveningColor, golden); fill.intensity = 2 - golden * 0.5;
-    const roomIndex = tourFrame ? (tourFrame.type === "read" ? tourFrame.room : -1) : destination < 1 ? -1 : Math.min(SPACES.length - 1, Math.floor(destination) - 1);
+    const tourPanel = tourFrame ? resolveTourPanel(tourFrame) : null;
+    host.dataset.scrollDriven = String(Boolean(tourPanel));
+    const roomIndex = tourFrame ? (tourFrame.type === "read" ? tourFrame.room : -1) : destination < 1 || !detailView ? -1 : destination - 1;
     roomPanels.forEach((panel, index) => {
       const surface = roomMounts[index];
-      const arriving = index === roomIndex && !transition && !cameraMoving;
+      if (tourPanel) {
+        const opacity = index === tourPanel.room ? tourPanel.opacity : 0;
+        const open = opacity > 0 && index === roomIndex;
+        if (surface.dataset.open === "true" && !open) surface.querySelectorAll("video").forEach((video) => video.pause());
+        surface.style.setProperty("--tour-opacity", opacity);
+        surface.dataset.open = String(open);
+        panel.visible = opacity > 0;
+        panel.userData.hideAt = 0;
+        panel.element.inert = !open; panel.element.style.pointerEvents = open ? "auto" : "none";
+        panel.element.setAttribute("aria-hidden", String(!open));
+        return;
+      }
+      const arriving = index === roomIndex && !transition && !cameraMoving && time >= contentReadyAt;
       // Mount closed for one painted frame so the first arrival also animates.
       const open = arriving && (panel.visible || !animated);
       if ((surface.dataset.open === "true") !== open) {
@@ -279,15 +295,32 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
           surface.querySelectorAll("video").forEach((video) => video.pause());
         }
       }
-      // CSS3D must keep the departing surface mounted through its fade-out.
+      // Keep the departing surface mounted through its fade-out.
       panel.visible = arriving || (animated && time < (panel.userData.hideAt || 0));
     });
     if (!reduced) ripples.forEach((ring, i) => { ring.material.opacity = 0.2 + Math.sin(time * 0.0007 + i) * 0.12; });
-    renderer.render(scene, camera); contentRenderer.render(contentScene, camera);
+    renderer.render(scene, camera);
+    roomPanels.forEach((panel) => { panel.element.style.display = panel.visible ? "block" : "none"; });
+    // Unhide the native surface before setting its reading position.
+    if (tourPanel && tourPanel.room >= 0 && tourPanel.opacity > 0) roomMounts[tourPanel.room].scrollTop = tourPanel.scrollTop;
     host.dataset.cameraState = transition || cameraMoving ? "moving" : "settled";
+    cameraSettling = cameraMoving;
+    host.dataset.cameraPose = [...camera.position.toArray(), ...gaze.toArray()].map((value) => value.toFixed(4)).join(",");
     host.dataset.motionEnabled = String(animated);
     host.dataset.tourProgress = (tourFrame?.totalProgress || 0).toFixed(4);
     host.dataset.tourPhase = tourFrame?.type || "off";
+    // Start the copy's entrance during the final gentle deceleration, but keep
+    // its CTA inert until arrival. Reading never creates another camera stop.
+    const summaryReady = destination > 0 && !detailView && travelProgress >= 0.76 && time >= contentReadyAt;
+    const summary = tourFrame ? resolveTourSummary(tourFrame) : {
+      room: summaryReady ? destination - 1 : -1,
+      opacity: summaryReady ? 1 : 0,
+      interactive: !transition,
+    };
+    // Both the camera and copy consume the same frame, including reverse travel.
+    summary.opacity = Math.round(summary.opacity * 1000) / 1000;
+    const summaryKey = `${summary.room}:${summary.opacity}:${summary.interactive}`;
+    if (summaryKey !== lastSummary) { lastSummary = summaryKey; onSummary(summary); }
     if (!painted) { painted = true; onReady(); }
     dirty = false; if (!reduced) wake();
   }
@@ -320,7 +353,7 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
     look.yaw = THREE.MathUtils.clamp(look.yaw, -0.25, 0.25); look.pitch = THREE.MathUtils.clamp(look.pitch, -0.18, 0.18); invalidate();
   }
   function visibility() { if (document.hidden) { cancelAnimationFrame(frame); frame = 0; } else { lastTime = performance.now(); invalidate(); } }
-  function motionChange() { reduced = preference.matches; transition = null; invalidate(); }
+  function motionChange() { reduced = preference.matches; transition = null; contentReadyAt = 0; invalidate(); }
   function loseContext(event) { event.preventDefault(); dispose(); onFailure(); }
   const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(host);
   const intersection = new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; if (inView) invalidate(); else { cancelAnimationFrame(frame); frame = 0; } }); intersection.observe(host);
@@ -332,15 +365,22 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
     host.removeEventListener("pointerdown", pointerDown); host.removeEventListener("pointermove", pointerMove); host.removeEventListener("pointerup", pointerUp);
     host.removeEventListener("pointercancel", pointerUp); host.removeEventListener("lostpointercapture", pointerUp); host.removeEventListener("keydown", keyDown);
     document.removeEventListener("visibilitychange", visibility); preference.removeEventListener("change", motionChange); renderer.domElement.removeEventListener("webglcontextlost", loseContext);
-    leafMesh.dispose(); resources.forEach((resource) => resource.dispose()); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); contentRenderer.domElement.remove();
+    leafMesh.dispose(); resources.forEach((resource) => resource.dispose()); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); contentLayer.remove();
   }
-  function navigateTo(value) {
+  function navigateTo(value, view = "overview") {
       tourFrame = null;
-      const from = camera.position.clone(), fromGaze = gaze.clone(); destination = THREE.MathUtils.clamp(value, 0, SPACES.length + 0.7);
+      const next = THREE.MathUtils.clamp(Math.round(value), 0, SPACES.length);
+      const sameRoom = next === destination;
+      const nextDetail = view === "read";
+      contentReadyAt = detailView !== nextDetail && motionEnabled && !reduced ? performance.now() + panelCloseDuration : 0;
+      detailView = nextDetail;
+      // Changing summary/details is a UI action, never a camera action.
+      if (sameRoom) { invalidate(); return; }
+      const from = camera.position.clone(), fromGaze = gaze.clone(); destination = next;
       const to = new THREE.Vector3(), toGaze = new THREE.Vector3(); pose(destination, to, toGaze);
       const distance = from.distanceTo(to); look.yaw = look.pitch = lookCurrent.yaw = lookCurrent.pitch = 0;
-      const exitDelay = roomMounts.some((surface) => surface.dataset.open === "true") ? panelCloseDuration : 0;
-      transition = painted && motionEnabled && !reduced && distance > 0.01 ? { from, to, fromGaze, toGaze, start: performance.now() + exitDelay, duration: distance < 8 ? 650 : 950, arc: Math.min(4, distance * 0.12) } : null;
+      // The departing HTML fades independently; navigation responds immediately.
+      transition = painted && motionEnabled && !reduced && distance > 0.01 ? { from, to, fromGaze, toGaze, start: performance.now(), duration: cameraDuration(distance) } : null;
       invalidate();
   }
   resize();
@@ -349,18 +389,13 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
     goTo: navigateTo,
     getTourMetrics() {
       resize();
-      const scale = Math.min(host.clientHeight * (narrow ? 0.59 : 0.66) / panelHeight, host.clientWidth * 0.84 / panelWidth);
       return roomPanels.map((panel, index) => {
-        // CSS3D does not attach a wall until its first visible frame. Attach
-        // unseen walls temporarily so the entire tour has real content metrics.
+        // Native pixels map 1:1 to the document's reading distance.
         const { display, visibility } = panel.element.style;
-        const detached = !panel.element.isConnected;
         panel.element.style.visibility = "hidden"; panel.element.style.display = "block";
-        if (detached) contentRenderer.domElement.appendChild(panel.element);
         const overflow = Math.max(0, roomMounts[index].scrollHeight - roomMounts[index].clientHeight);
-        if (detached) panel.element.remove();
         panel.element.style.display = display; panel.element.style.visibility = visibility;
-        return { overflow, scale };
+        return { overflow, scale: 1 };
       });
     },
     setTourFrame(next) {
@@ -372,9 +407,9 @@ export function createGarden(host, onFailure, onReady, onNavigate) {
       invalidate();
     },
     stopTour() {
-      if (tourFrame) navigateTo(tourFrame.to);
+      if (tourFrame) navigateTo(tourFrame.to, tourFrame.type === "read" || tourFrame.type === "reveal" ? "read" : "overview");
     },
-    setMotionEnabled(enabled) { motionEnabled = enabled; if (!enabled) transition = null; invalidate(); },
+    setMotionEnabled(enabled) { motionEnabled = enabled; if (!enabled) { transition = null; contentReadyAt = 0; } invalidate(); },
     setGolden(value) { goldenTarget = value ? 1 : 0; invalidate(); },
     dispose,
   };

@@ -5,6 +5,11 @@
   --panel-translate-y: 100px;
   --panel-blur: 2px;
   --panel-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --stagger-dur: 500ms;
+  --stagger-distance: 12px;
+  --stagger-stagger: 40ms;
+  --stagger-blur: 3px;
+  --stagger-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .t-panel-slide {
@@ -33,8 +38,62 @@
   .t-panel-slide { transition: none !important; }
 }
 
+.t-stagger-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(var(--stagger-distance));
+  filter: blur(var(--stagger-blur));
+  transition:
+    opacity   var(--stagger-dur) var(--stagger-ease),
+    transform var(--stagger-dur) var(--stagger-ease),
+    filter    var(--stagger-dur) var(--stagger-ease);
+  will-change: transform, opacity, filter;
+}
+.t-stagger-line--2 { transition-delay: var(--stagger-stagger); }
+
+.t-stagger.is-shown .t-stagger-line {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+.t-stagger.is-hiding .t-stagger-line {
+  opacity: 0;
+  transform: translateY(0);
+  filter: blur(0);
+  transition:
+    opacity 200ms ease,
+    transform 0s linear,
+    filter 0s linear;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-stagger-line { transition: none !important; }
+}
+
+.t-stagger-line--3 { transition-delay: calc(var(--stagger-stagger) * 2); }
+.t-stagger-line--4 { transition-delay: calc(var(--stagger-stagger) * 3); }
 .experience-viewport[data-motion-enabled="false"] .t-panel-slide { transition: none !important; }
-.room-surface.t-panel-slide { --panel-translate-y: 12px; }
+.room-surface.t-panel-slide { --panel-translate-y: 8px; --panel-blur: 0px; }
+/* The tour scrubs the existing reveal; timed transitions would skip short rooms. */
+.experience-viewport[data-scroll-driven="true"] .t-panel-slide,
+.experience[data-scroll-tour="true"] .room-summary {
+  transition: none;
+  opacity: var(--tour-opacity, 0);
+  transform: translateY(calc(var(--panel-translate-y) * (1 - var(--tour-opacity, 0))));
+  filter: blur(calc(var(--panel-blur) * (1 - var(--tour-opacity, 0))));
+}
+.experience[data-scroll-tour="true"] .room-summary .t-stagger-line {
+  --line-delay: 0;
+  --line-progress: clamp(0, (var(--tour-opacity, 0) - var(--line-delay)) / (1 - var(--line-delay)), 1);
+  transition: none;
+  opacity: var(--line-progress);
+  transform: translateY(calc(var(--stagger-distance) * (1 - var(--line-progress))));
+  filter: blur(0);
+}
+.experience[data-scroll-tour="true"] .room-summary .t-stagger-line--2 { --line-delay: 0.08; }
+.experience[data-scroll-tour="true"] .room-summary .t-stagger-line--3 { --line-delay: 0.16; }
+.experience[data-scroll-tour="true"] .room-summary .t-stagger-line--4 { --line-delay: 0.24; }
 .frame { max-width: none; }
 .site-header { position: fixed; top: 0; left: 0; width: 100%; color: #f0f2e9; }
 .site-header-inner { border-bottom-color: #e5ebdd33; }
@@ -44,7 +103,7 @@
 .site-header .lang-btn { color: #d4ddcc; }
 html[data-locale="en"] .site-header .lang-btn[data-set="en"], html[data-locale="ko"] .site-header .lang-btn[data-set="ko"] { color: #fff; }
 .hero.immersive-hero { display: block; min-height: 0; padding: 0; }
-.experience { position: relative; height: 100svh; background: #0b333b; }
+.experience { position: relative; height: 100svh; background: #0b333b; --panel-close-dur: 220ms; }
 .experience-stage { position: relative; height: 100svh; min-height: 520px; overflow: hidden; color: #f3f4eb; }
 .experience-viewport { position: absolute; inset: 0; cursor: grab; touch-action: pan-y; outline-offset: -8px !important; }
 .experience-viewport:active { cursor: grabbing; }
@@ -53,26 +112,30 @@ html[data-locale="en"] .site-header .lang-btn[data-set="en"], html[data-locale="
 .experience-fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
 .experience[data-ready="true"] .experience-fallback { visibility: hidden; }
 .experience-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 30%, #082f3520 50%, #082f3588 100%), linear-gradient(0deg, #092c35cf, transparent 24%, transparent 83%, #092c3555); }
-.experience:not([data-space="garden"]) .experience-shade { background: linear-gradient(0deg, #14251fc9, transparent 18%, transparent 78%, #14291bc0); }
+.experience:not([data-space="garden"]) .experience-shade { background: linear-gradient(90deg, transparent 30%, #092f3580 54%, #092f35ed 78%), linear-gradient(0deg, #092f35c9, transparent 24%, transparent 80%, #092f3588); }
 .experience-meta { position: absolute; top: 135px; left: var(--page-inset); display: flex; align-items: center; gap: 12px; color: #d3ddc9; font: 400 0.57rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.12em; pointer-events: none; }
 .experience-meta .living-dot { background: #cadba1; box-shadow: 0 0 0 4px #cadba115; }
-.experience[data-space="garden"] .experience-meta { display: none; }
+.experience[data-view="overview"] .experience-meta { display: none; }
+.room-summary { position: absolute; left: 58%; top: 29%; width: min(510px, 36vw); --panel-translate-y: 0px; --panel-blur: 0px; --stagger-distance: 10px; --stagger-blur: 0px; }
+.room-summary h2 { color: #fbf3de; font: 400 clamp(3rem, 4.8vw, 5.5rem)/1.02 var(--font-serif); letter-spacing: -0.035em; margin: 0 0 24px; text-wrap: balance; }
+.room-summary .experience-description { max-width: 350px; }
+.room-summary .experience-eyebrow { color: #f3ddb1; }
+.room-summary[inert] { pointer-events: none; }
+.experience[data-motion="false"] .room-summary,
+.experience[data-motion="false"] .room-summary .t-stagger-line { transition: none !important; }
+html[data-locale="ko"] .room-summary h2 { font: 400 clamp(2.4rem, 3.5vw, 4rem)/1.3 var(--font-body); letter-spacing: -0.06em; word-break: keep-all; }
 .experience-copy { position: absolute; left: 58%; top: 31%; width: min(510px, 37vw); pointer-events: none; opacity: 0; transform: translateY(12px); transition: opacity 300ms ease, transform 500ms ease; }
 .experience-copy a, .experience-copy button { pointer-events: auto; }
 .experience-copy[inert] a, .experience-copy[inert] button { pointer-events: none; }
-.experience[data-chapter="0"] .experience-arrival, .experience[data-chapter="1"] .experience-court, .experience[data-chapter="2"] .experience-oculus { opacity: 1; transform: none; }
+.experience[data-space="garden"] .experience-arrival { opacity: 1; transform: none; }
 .experience-eyebrow { display: flex; align-items: center; gap: 9px; font: 400 0.66rem/1.6 var(--font-body); color: #e2e7d9; margin: 0 0 20px; }
-.hero.immersive-hero h1, .experience-copy h2 { color: #fbf3de; font: 400 clamp(3.4rem, 5.8vw, 7rem)/0.98 var(--font-serif); letter-spacing: -0.045em; margin: 0 0 24px; }
-.hero.immersive-hero h1 em, .experience-copy h2 em { font-family: var(--font-serif); font-size: 1em; letter-spacing: inherit; color: #f1d99e; font-weight: 400; line-height: inherit; }
-.experience-copy h2 { font-size: clamp(3rem, 5.4vw, 6rem); }
+.hero.immersive-hero h1 { color: #fbf3de; font: 400 clamp(3.4rem, 5.8vw, 7rem)/0.98 var(--font-serif); letter-spacing: -0.045em; margin: 0 0 24px; }
+.hero.immersive-hero h1 em { font-family: var(--font-serif); font-size: 1em; letter-spacing: inherit; color: #f1d99e; font-weight: 400; line-height: inherit; }
 .experience-description { max-width: 320px; font-size: 0.8rem; line-height: 1.75; color: #d0dccf; margin-bottom: 27px; }
 .experience-actions { display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
 .experience-enter { display: inline-flex; align-items: center; justify-content: space-between; gap: 35px; background: #f3ddb1; color: #193e3d; border: 1px solid #f3ddb1; padding: 13px 20px; min-height: 46px; font-size: 0.72rem; text-decoration: none; cursor: pointer; border-radius: 2px; transition: background 180ms; }
 .experience-enter:hover { background: #fff2d3; }
 .experience-enter:disabled { opacity: 0.5; cursor: wait; }
-.experience-actions > a:not(.experience-enter), .experience-next { display: inline-flex; align-items: center; gap: 20px; font-size: 0.7rem; min-height: 44px; text-decoration: none; color: #eef1e7; background: transparent; border: 0; cursor: pointer; padding: 0; }
-.experience-next { border-bottom: 1px solid #d8e1cd80; }
-.experience-next:disabled { opacity: 0.5; cursor: default; }
 .experience a:focus-visible, .experience button:focus-visible, .site-header a:focus-visible, .site-header button:focus-visible { outline-color: #e2ebc9; }
 .experience-bottom { position: absolute; bottom: 28px; left: var(--page-inset); right: var(--page-inset); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; pointer-events: none; }
 .experience-bottom button { pointer-events: auto; }
@@ -91,17 +154,16 @@ html[data-locale="en"] .site-header .lang-btn[data-set="en"], html[data-locale="
 .experience-progress span { display: block; height: 100%; width: 100%; background: #f3ddb1; transform: scaleX(var(--tour-progress, 0)); transform-origin: left; }
 .studio-strip { margin-top: 0; padding-top: 33px; padding-bottom: 33px; border-top: none; }
 html[data-locale="ko"] .hero.immersive-hero h1 { font-family: var(--font-body); font-size: clamp(2.6rem, 4.25vw, 4.8rem); line-height: 1.3; letter-spacing: -0.065em; }
-html[data-locale="ko"] .hero.immersive-hero h1 em, html[data-locale="ko"] .experience-copy h2 em { font-family: var(--font-body); font-style: normal; font-size: 1em; }
-html[data-locale="ko"] .experience-copy h2 { line-height: 1.25; font-size: clamp(2.5rem, 4.5vw, 5rem); }
+html[data-locale="ko"] .hero.immersive-hero h1 em { font-family: var(--font-body); font-style: normal; font-size: 1em; }
 .experience:not([data-ready="true"]) { height: auto; }
 body:has(.experience[data-ready="false"]) .site-header { position: absolute; }
 .experience[data-ready="true"] .experience-stage { min-height: 0; }
 .experience[data-scroll-tour="true"] { height: var(--tour-height, 320svh); overflow-anchor: none; }
 .experience[data-scroll-tour="true"] .experience-stage { position: sticky; top: 0; }
 .experience[data-scroll-tour="true"] .room-surface { overflow: hidden; overscroll-behavior: auto; }
-.spatial-content-renderer { position: absolute; inset: 0; pointer-events: none; }
-.spatial-room-panel { color: var(--ink); backface-visibility: hidden; }
-.room-surface { height: 100%; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #80936b #e6dec3; cursor: auto; user-select: text; background: var(--paper); box-shadow: 0 0 0 7px #d8bd80, 0 0 0 9px #63543b; }
+.spatial-content-renderer { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.spatial-room-panel { position: absolute; left: 56%; right: var(--page-inset); top: 17%; bottom: 16%; color: var(--ink); }
+.room-surface { container: room-content / inline-size; height: 100%; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #80936b #e6dec3; cursor: auto; user-select: text; background: var(--paper); box-shadow: 0 0 0 7px #d8bd80, 0 0 0 9px #63543b; }
 .room-surface:focus-visible { outline: 2px solid var(--moss); outline-offset: -4px; }
 .room-surface > section, .room-surface > .contact-space > section { padding: 35px; }
 .room-surface .section-head { margin-bottom: 25px; gap: 20px; }
@@ -146,8 +208,9 @@ html[data-locale="ko"] .room-surface .section-head h2 { font: 500 1.7rem/1.3 var
   .experience { height: 100svh; }
   .experience-meta { top: 110px; font-size: 0.51rem; }
   .experience-copy { left: 52%; width: 43%; top: 32%; bottom: auto; }
+  .room-summary { left: 54%; width: 41%; }
+  .room-summary h2 { font-size: 3rem; }
   .hero.immersive-hero h1 { font-size: clamp(2.8rem, 6.6vw, 4rem); }
-  .experience-copy h2 { font-size: 3rem; }
   .experience-chapters { gap: 18px; }
   .room-surface .sub-grid { grid-template-columns: 1fr; }
   .room-surface .stack-grid { grid-template-columns: 1fr 1fr; }
@@ -160,7 +223,12 @@ html[data-locale="ko"] .room-surface .section-head h2 { font: 500 1.7rem/1.3 var
   .experience-eyebrow { margin-bottom: 12px; }
   .experience-description { max-width: 330px; font-size: 0.74rem; margin-bottom: 18px; }
   .experience-shade { background: linear-gradient(0deg, #082e38 6%, #082e38e6 29%, #082e3870 46%, transparent 64%, #082e3833); }
-  .experience:not([data-space="garden"]) .experience-shade { background: linear-gradient(0deg, #082e38e6, transparent 24%, transparent 78%, #082e38b0); }
+  .experience:not([data-space="garden"]) .experience-shade { background: linear-gradient(0deg, #092f35 12%, #092f35f2 30%, #092f3580 55%, transparent 72%, #092f3566); }
+  .spatial-room-panel { left: var(--page-inset); top: 29%; bottom: 21%; }
+  .room-summary { left: var(--page-inset); right: var(--page-inset); width: auto; top: auto; bottom: 21%; }
+  .room-summary h2 { font-size: clamp(2.3rem, 9vw, 3.5rem); margin-bottom: 16px; }
+  html[data-locale="ko"] .room-summary h2 { font-size: clamp(1.8rem, 6.9vw, 2.7rem); }
+  .room-summary .experience-description { max-width: 360px; font-size: 0.76rem; margin-bottom: 20px; }
 }
 @media (max-width: 500px) {
   .experience-stage { min-height: 600px; }
@@ -168,10 +236,8 @@ html[data-locale="ko"] .room-surface .section-head h2 { font: 500 1.7rem/1.3 var
   .experience-copy { width: calc(100% - var(--page-inset) * 2); bottom: 20%; }
   .experience-eyebrow { font-size: 0.61rem; margin-bottom: 12px; letter-spacing: 0; }
   .hero.immersive-hero h1 { font-size: clamp(2.9rem, 11.7vw, 3.9rem); margin-bottom: 15px; }
-  .experience-copy h2 { font-size: clamp(2.4rem, 10.5vw, 3.4rem); }
   .experience-description { font-size: 0.72rem; max-width: 310px; margin-bottom: 18px; }
   .experience-actions { gap: 18px; } .experience-enter { padding: 14px 17px; gap: 23px; font-size: 0.65rem; }
-  .experience-actions > a:not(.experience-enter) { font-size: 0.63rem; gap: 10px; }
   .experience-bottom { bottom: 25px; flex-wrap: wrap; gap: 18px; }
   .experience-hint { width: 100%; max-width: none; font-size: 0.5rem; }
   .scroll-line { height: 22px; }
@@ -193,23 +259,58 @@ html[data-locale="ko"] .room-surface .section-head h2 { font: 500 1.7rem/1.3 var
   .experience-preferences { gap: 12px; width: 100%; justify-content: space-between; }
   .experience-motion { font-size: 0.5rem; gap: 6px; }
   html[data-locale="ko"] .hero.immersive-hero h1 { font-size: clamp(2.1rem, 8.6vw, 2.7rem); }
-  html[data-locale="ko"] .experience-copy h2 { font-size: clamp(2rem, 8.7vw, 2.8rem); }
 }
 @media (max-height: 740px) and (max-width: 699px) {
   .experience-copy { bottom: 22%; }
   .experience-description { display: none; }
   .experience-eyebrow { font-size: 0.57rem; }
   .experience-bottom { bottom: 14px; }
+  .room-summary { bottom: 24%; }
+  .room-summary .experience-description { display: block; font-size: 0.7rem; line-height: 1.6; margin-bottom: 12px; }
+  .room-summary h2 { font-size: 2.15rem; }
+  html[data-locale="ko"] .room-summary h2 { font-size: 1.7rem; }
+  .spatial-room-panel { top: 27%; bottom: 24%; }
 }
 @media (max-height: 600px) and (min-width: 700px) {
   .site-header-inner { min-height: 64px; }
   .experience-copy { top: 25%; bottom: auto; }
-  .hero.immersive-hero h1, .experience-copy h2 { font-size: 3rem; margin-bottom: 16px; }
-  html[data-locale="ko"] .hero.immersive-hero h1, html[data-locale="ko"] .experience-copy h2 { font-size: 2.3rem; }
+  .hero.immersive-hero h1 { font-size: 3rem; margin-bottom: 16px; }
+  html[data-locale="ko"] .hero.immersive-hero h1 { font-size: 2.3rem; }
   .experience-eyebrow { margin-bottom: 10px; }
   .experience-description { display: none; }
   .experience-meta { top: 72px; }
   .experience-bottom { bottom: 15px; gap: 4px 20px; }
+  .room-summary { top: 23%; }
+  .room-summary h2 { font-size: 2.8rem; margin-bottom: 12px; }
+  .room-summary .experience-description { display: block; margin-bottom: 16px; }
+  html[data-locale="ko"] .room-summary h2 { font-size: 2.1rem; }
+}
+
+/* The reading panel responds to its own width, not the full WebGL viewport. */
+@container room-content (max-width: 650px) {
+  .room-surface > section, .room-surface > .contact-space > section { padding: 26px; }
+  .room-surface .section-head { display: block; }
+  .room-surface .section-head h2 { max-width: none; font-size: 2rem; }
+  .room-surface .section-head .aside { display: block; text-align: left; margin-top: 12px; }
+  .room-surface .sub-grid, .room-surface .capability-grid, .room-surface .prop-grid { grid-template-columns: 1fr; }
+  .room-surface .stack-grid { grid-template-columns: 1fr 1fr; }
+  .room-surface .product-table { grid-template-columns: minmax(0, 1fr) 65px; }
+  .room-surface .product-cell-name { grid-column: 1; padding-bottom: 14px; }
+  .room-surface .product-cell-desc { grid-column: 1 / -1; padding: 0 0 25px; border-top: 0; }
+  .room-surface .product-cell-status { grid-column: 2; }
+  .room-surface .product-cell-status:nth-child(3) { grid-row: 1; }
+  .room-surface .product-cell-status:nth-child(6) { grid-row: 3; }
+  .room-surface .product-cell-status:nth-child(9) { grid-row: 5; }
+  .room-surface .product-cell-status:nth-child(12) { grid-row: 7; }
+  .room-surface .product-cell-status:nth-child(15) { grid-row: 9; }
+  .room-surface .product-cell-status:nth-child(18) { grid-row: 11; }
+  .room-surface .product-cell-status:nth-child(21) { grid-row: 13; }
+  .room-surface .contact h2 { font-size: 2.5rem; }
+}
+@container room-content (max-width: 380px) {
+  .room-surface > section, .room-surface > .contact-space > section { padding: 22px 18px; }
+  .room-surface .section-head h2 { font-size: 1.55rem; }
+  .room-surface .stack-grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .experience { height: 100svh; }
