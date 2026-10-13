@@ -231,6 +231,23 @@ const PRODUCTS = [
     links: [{ href: "https://pensa.lat", label: "pensa.lat →" }],
     status: "Beta",
   },
+  {
+    name: "Skyad",
+    short: { en: "Multiplayer dogfight in the browser", ko: "브라우저 멀티플레이 공중전" },
+    logo: "/logos/skyad.png",
+    meta: {
+      en: "Web / Realtime multiplayer game / Vite · WebSockets · Stripe",
+      ko: "웹 / 실시간 멀티플레이 게임 / Vite · WebSockets · Stripe",
+    },
+    desc: {
+      en:
+        "A live dogfight that never stops: shoot down other pilots with guns and lock-on missiles, and your best life of the week counts. The weekly top 10 fly sponsor liveries, and their planes keep hunting as aces while they're offline. Free with one short ad per life, or ad-free by subscription.",
+      ko:
+        "멈추지 않는 실시간 공중전입니다. 기관총과 유도 미사일로 다른 파일럿을 격추하고, 한 주 동안의 최고 기록이 순위에 남습니다. 주간 상위 10명은 스폰서 도색을 달고 날며, 오프라인일 때도 그 비행기가 에이스로 남아 다른 파일럿을 쫓습니다. 한 번 출격할 때마다 짧은 광고 하나로 무료이고, 구독하면 광고 없이 즐길 수 있습니다.",
+    },
+    links: [{ href: "https://skyad.lol", label: "skyad.lol →" }],
+    status: "Live",
+  },
 ];
 
 function ProductRow({ product, last }) {
