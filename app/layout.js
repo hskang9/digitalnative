@@ -1,5 +1,7 @@
 import "./globals.css";
 import "./experience.css";
+import "./scene-loader.css";
+import { SCENE_BOOT } from "./scene-boot.mjs";
 
 export const metadata = {
   title: "Digital Native — AI-native software development firm",
@@ -45,6 +47,7 @@ export default function RootLayout({ children }) {
     <html lang="en" data-locale="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOT }} />
+        <script dangerouslySetInnerHTML={{ __html: SCENE_BOOT }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -57,7 +60,12 @@ export default function RootLayout({ children }) {
         />
         <noscript>
           {/* Without JS the reveal observer never runs — show everything. */}
-          <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important}
+            .scene-loader{display:none!important}
+            .experience[data-scene-state="loading"]{height:auto!important}
+            .experience[data-scene-state="loading"] .experience-visual{visibility:visible!important;opacity:1!important;filter:none!important}
+            .experience[data-scene-state="loading"] .spatial-fallback-content{display:block!important}
+            .experience[data-scene-state="loading"] .experience-copy{left:var(--page-inset);right:var(--page-inset);width:auto}`}</style>
         </noscript>
       </head>
       <body>{children}</body>

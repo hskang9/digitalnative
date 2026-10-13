@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import { SPACES } from "./spaces";
 import { buildTourPath, resolveTourFrame, roomCameraStop, tourRoomOffset } from "./tour-path.mjs";
 import { sectionKeyAction } from "./section-navigation.mjs";
+import { startSceneLoad } from "./scene-loading.mjs";
+import SceneLoader from "./scene-loader";
 
 function T({ en, ko }) {
   return <><span data-l="en">{en}</span><span data-l="ko" lang="ko">{ko}</span></>;
@@ -51,7 +53,11 @@ export default function GardenScene({ children }) {
   const currentSpace = useRef(-1);
   const currentView = useRef("overview");
   const scrollTarget = useRef(null);
-  const [ready, setReady] = useState(false);
+  const sceneLoader = useRef(null);
+  const [sceneState, setSceneState] = useState("loading");
+  const [loadPhase, setLoadPhase] = useState("loading");
+  const [fallbackReason, setFallbackReason] = useState("");
+  const ready = sceneState === "ready";
   const [golden, setGolden] = useState(false);
   const [mounts, setMounts] = useState([]);
   const [activeSpace, setActiveSpace] = useState(-1);
@@ -85,7 +91,8 @@ export default function GardenScene({ children }) {
 
   useEffect(() => {
     let cancelled = false;
-    let dispose;
+    let fallbackFrame = 0;
+    const initialFallback = document.documentElement.dataset.sceneFallback;
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     let enabled = true;
     try {
@@ -95,37 +102,59 @@ export default function GardenScene({ children }) {
     setCameraMotion(enabled); setReducedPreference(preference.matches);
     const onPreference = () => setReducedPreference(preference.matches);
     preference.addEventListener("change", onPreference);
-    import("./garden-world").then(({ createGarden }) => {
-      if (cancelled || !host.current) return;
-      const garden = createGarden(host.current, () => { world.current = null; setReady(false); setMounts([]); }, () => {
-        if (!cancelled) setReady(true);
-      }, (id) => travelToSpace(SPACES.findIndex((space) => space.id === id)), (next) => {
-        if (!cancelled) setSummary(next);
-      });
-      if (!garden) return;
-      world.current = garden;
-      dispose = garden.dispose;
-      setMounts(garden.mounts);
-      garden.setMotionEnabled(enabled);
-      const initial = SPACES.findIndex((space) => space.id === location.hash.slice(1));
-      travelToSpace(initial, false);
-    }).catch(() => {});
+    const loader = startSceneLoad({
+      load: () => import("./garden-world"),
+      create: ({ createGarden }, fail, rendered) => createGarden(host.current, fail, rendered,
+        (id) => travelToSpace(SPACES.findIndex((space) => space.id === id)),
+        (next) => { if (!cancelled) setSummary(next); }),
+      onPhase: setLoadPhase,
+      onReady: () => { window.__dnSceneBoot?.finish(); setSceneState("ready"); },
+      onCreated: (garden) => {
+        world.current = garden;
+        setMounts(garden.mounts);
+        garden.setMotionEnabled(enabled);
+        const initial = SPACES.findIndex((space) => space.id === location.hash.slice(1));
+        travelToSpace(initial, false);
+      },
+      onFallback: (reason) => {
+        window.__dnSceneBoot?.finish();
+        world.current = null; tourActiveRef.current = false; scrollTarget.current = null;
+        currentSpace.current = -1; currentView.current = "overview";
+        setSceneState("fallback"); setFallbackReason(reason); setMounts([]);
+        setActiveSpace(-1); setActiveView("overview"); setScrollTour(false);
+        setSummary({ room: -1, opacity: 0, interactive: false });
+        // If HTML was already usable before hydration, preserve its reading position.
+        if (initialFallback) return;
+        fallbackFrame = requestAnimationFrame(() => {
+          // Follow an incoming hash or a link clicked while the scene loads.
+          const target = document.getElementById(location.hash.slice(1));
+          if (target) target.scrollIntoView({ behavior: "instant" });
+          else window.scrollTo({ top: 0, behavior: "instant" });
+        });
+      },
+    });
+    sceneLoader.current = loader;
+    const onEarlyFallback = (event) => loader.useFallback(event.detail);
+    window.addEventListener("dn-scene-fallback", onEarlyFallback);
+    if (initialFallback) loader.useFallback(initialFallback);
     function navigate(event) {
       const link = event.target.closest?.('a[href^="#"]');
-      if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0 || !world.current) return;
+      if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
       const id = link.getAttribute("href").slice(1);
       const index = SPACES.findIndex((space) => space.id === id);
       if (index === -1 && id && id !== "garden") return;
+      if (!world.current || !loader.isReady()) { loader.skip(); return; }
       event.preventDefault(); travelToSpace(index);
     }
     function onHash() {
+      if (!world.current) return;
       const id = location.hash.slice(1);
       const index = SPACES.findIndex((space) => space.id === id);
       if (index !== -1 || !id || id === "garden") travelToSpace(index, false);
     }
     function clearScrollTarget() { scrollTarget.current = null; }
     function navigateByKey(event) {
-      if (!world.current || !host.current) return;
+      if (!world.current || !host.current || !loader.isReady()) return;
       const bounds = host.current.getBoundingClientRect();
       if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) return;
       const target = event.target;
@@ -168,7 +197,9 @@ export default function GardenScene({ children }) {
       document.removeEventListener("pointerdown", clearScrollTarget);
       window.removeEventListener("wheel", clearScrollTarget);
       window.removeEventListener("touchstart", clearScrollTarget);
-      dispose?.(); world.current = null;
+      cancelAnimationFrame(fallbackFrame);
+      window.removeEventListener("dn-scene-fallback", onEarlyFallback);
+      loader.dispose(); sceneLoader.current = null; world.current = null;
     };
   }, []);
 
@@ -270,24 +301,12 @@ export default function GardenScene({ children }) {
   }
 
   return (
-    <div className="experience" ref={journey} data-ready={ready} data-scroll-tour={tourActive} data-view={activeView} data-motion={cameraMotion && !reducedPreference} data-space={activeSpace < 0 ? "garden" : SPACES[activeSpace].id} data-light={golden ? "golden" : "day"}>
-      <div className="experience-stage">
+    <div className="experience" ref={journey} data-scene-state={sceneState} data-ready={ready} data-scroll-tour={tourActive} data-view={activeView} data-motion={cameraMotion && !reducedPreference} data-space={activeSpace < 0 ? "garden" : SPACES[activeSpace].id} data-light={golden ? "golden" : "day"}>
+      <div className={`experience-stage t-skel${sceneState !== "loading" ? " is-revealed" : ""}`} data-state={sceneState}>
+        <SceneLoader loading={sceneState === "loading"} phase={loadPhase} onSkip={() => sceneLoader.current?.skip()} />
+        <div className="experience-visual t-skel-content">
         <div className="experience-viewport" ref={host} tabIndex={ready ? 0 : -1} role="group"
-          aria-label="Explore the architectural garden / 건축 정원 둘러보기" aria-describedby="experience-instructions">
-          <svg className="experience-fallback" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A warm terraced tower among a deep teal forest / 청록빛 숲 속 테라스 정원과 따뜻한 탑">
-            <rect width="1440" height="900" fill="#0b333b" />
-            <g fill="#205558">{Array.from({ length: 20 }, (_, i) => <ellipse key={i} cx={i * 85 - 50} cy={230 + i % 3 * 190} rx="160" ry="230" />)}</g>
-            <g stroke="#344436" strokeWidth="3">
-              <path d="M265 820V350h280v470" fill="#d69a54"/><path d="M340 820V180h220v640" fill="#e6b550"/>
-              <path d="M340 355h220M340 515h220M265 680h295" stroke="#eed7a1" strokeWidth="15"/>
-              <path d="M325 182h250l-25-35H350Z" fill="#b97141"/>
-              <path d="M367 147V87h65v60" fill="#e8b85a"/><path d="m355 87 44-64 46 64Z" fill="#247677"/>
-              {[240, 405, 565, 725].map((y) => <g key={y}><path d={`M385 ${y + 60}v-53a22 22 0 0 1 44 0v53Z`} fill="#684e38"/><path d={`M480 ${y + 40}v-44a18 18 0 0 1 36 0v44Z`} fill="#42676a"/></g>)}
-            </g>
-            <g fill="#889445">{Array.from({ length: 26 }, (_, i) => <ellipse key={i} cx={i % 2 ? 550 : 345} cy={190 + i * 23} rx={18 + i % 3 * 4} ry="18" />)}</g>
-            <g fill="#58774a"><ellipse cx="100" cy="830" rx="200" ry="230"/><ellipse cx="700" cy="900" rx="240" ry="170"/><ellipse cx="1280" cy="790" rx="240" ry="160"/></g>
-          </svg>
-        </div>
+          aria-label="Explore the architectural garden / 건축 정원 둘러보기" aria-describedby="experience-instructions" />
         <div className="experience-shade" aria-hidden="true" />
         <div className="experience-meta"><span className="living-dot" /><T en={activeSpace < 0 ? "An independent software practice" : SPACES[activeSpace].sign} ko={activeSpace < 0 ? "독립적인 소프트웨어 개발 스튜디오" : SPACES[activeSpace].ko} /></div>
 
@@ -298,6 +317,10 @@ export default function GardenScene({ children }) {
           <div className="experience-actions">
             <a className="experience-enter" href="#products"><T en="Explore the work" ko="제품 둘러보기" /><span aria-hidden="true">↗</span></a>
           </div>
+          <p className="scene-fallback-note" role="status" hidden={sceneState !== "fallback"}>
+            <T en={!fallbackReason ? "You can explore all sections below." : fallbackReason === "skipped" ? "Browsing without 3D. All sections are available below." : fallbackReason === "timeout" ? "The garden took too long to load. Explore the work below." : "3D isn't available here. All sections are available below."}
+              ko={!fallbackReason ? "아래에서 모든 내용을 둘러볼 수 있습니다." : fallbackReason === "skipped" ? "3D 없이 둘러보고 있습니다. 아래에서 모든 내용을 볼 수 있어요." : fallbackReason === "timeout" ? "정원을 불러오는 데 시간이 걸리고 있어요. 아래에서 제품과 서비스를 둘러보세요." : "3D를 표시할 수 없어 기본 페이지로 전환했어요. 아래에서 모든 내용을 볼 수 있습니다."} />
+          </p>
         </div>
 
         {SPACES.map((space, index) => {
@@ -323,6 +346,7 @@ export default function GardenScene({ children }) {
         </div>
         <div className="experience-progress" hidden={!tourActive} aria-hidden="true"><span /></div>
         <p className="sr-only" id="experience-instructions"><T en="Left and right arrow keys move to the previous and next room. Up and down do the same outside reading; while reading, they scroll the content. Each press moves one room without wrapping. Inputs, media controls, and text selection keep their own keyboard behavior. Scroll tour uses one page scrollbar from the garden through Products, Practice, Work together, Stack, Press, and Contact. At each room the camera stays still until all content has scrolled past, then continues. Navigation jumps to a room in the same tour. Turn Scroll tour off for independent room scrolling, or turn Motion off for instant navigation. Reduced motion disables the tour. Browser Back and Forward restore chosen rooms." ko="왼쪽과 오른쪽 방향키로 이전과 다음 공간으로 이동합니다. 위아래 방향키도 공간을 이동하지만, 상세 내용을 읽는 동안에는 내용을 스크롤합니다. 한 번 누를 때 한 공간씩 이동하며, 처음과 끝에서는 멈춥니다. 입력 필드, 미디어 컨트롤, 텍스트 선택은 원래 키보드 동작을 유지합니다. 스크롤 투어는 정원에서 제품, 역량, 함께 만들기, 기술, 보도, 연락까지 하나의 페이지 스크롤로 이어집니다. 각 공간의 내용을 모두 읽는 동안 카메라가 멈추고, 그다음 다음 공간으로 이동합니다. 메뉴로 원하는 공간에 바로 갈 수 있습니다. 스크롤 투어를 끄면 각 공간을 따로 스크롤하고, 모션을 끄면 즉시 이동합니다. 동작 줄이기 설정에서는 투어가 꺼집니다. 브라우저 뒤로가기와 앞으로가기로 선택한 공간을 다시 볼 수 있습니다." /></p>
+        </div>
       </div>
       {mounts.length ? panels.map((panel, index) => mounts[index] ? createPortal(panel, mounts[index], SPACES[index].id) : null) : <div className="spatial-fallback-content">{children}</div>}
     </div>

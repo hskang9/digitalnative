@@ -109,8 +109,6 @@ html[data-locale="en"] .site-header .lang-btn[data-set="en"], html[data-locale="
 .experience-viewport:active { cursor: grabbing; }
 .experience-viewport canvas { display: block; width: 100%; height: 100%; opacity: 0; }
 .experience[data-ready="true"] canvas { opacity: 1; }
-.experience-fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
-.experience[data-ready="true"] .experience-fallback { visibility: hidden; }
 .experience-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 30%, #082f3520 50%, #082f3588 100%), linear-gradient(0deg, #092c35cf, transparent 24%, transparent 83%, #092c3555); }
 .experience:not([data-space="garden"]) .experience-shade { background: linear-gradient(90deg, transparent 30%, #092f3580 54%, #092f35ed 78%), linear-gradient(0deg, #092f35c9, transparent 24%, transparent 80%, #092f3588); }
 .experience-meta { position: absolute; top: 135px; left: var(--page-inset); display: flex; align-items: center; gap: 12px; color: #d3ddc9; font: 400 0.57rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.12em; pointer-events: none; }

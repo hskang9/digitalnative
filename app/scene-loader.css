@@ -1,0 +1,210 @@
+:root {
+  --pulse-dur: 1000ms;
+  --pulse-count: 1;
+  --pulse-min: 0.5;
+  --reveal-dur: 400ms;
+  --reveal-blur: 2px;
+  --reveal-ease: ease-in-out;
+}
+
+.t-skel { position: relative; }
+.t-skel-skeleton,
+.t-skel-content {
+  position: absolute;
+  inset: 0;
+}
+
+.t-skel-skeleton {
+  z-index: 1;
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    opacity var(--reveal-dur) var(--reveal-ease),
+    filter  var(--reveal-dur) var(--reveal-ease);
+}
+.t-skel-content {
+  z-index: 2;
+  opacity: 0;
+  filter: blur(var(--reveal-blur));
+  transition:
+    opacity var(--reveal-dur) var(--reveal-ease),
+    filter  var(--reveal-dur) var(--reveal-ease);
+}
+.t-skel.is-revealed .t-skel-skeleton {
+  opacity: 0;
+  filter: blur(var(--reveal-blur));
+}
+.t-skel.is-revealed .t-skel-content {
+  opacity: 1;
+  filter: blur(0);
+}
+.t-skel.is-resetting .t-skel-skeleton,
+.t-skel.is-resetting .t-skel-content {
+  transition: none !important;
+}
+
+.t-skel-skeleton.is-pulsing > * {
+  animation: t-skel-pulse var(--pulse-dur) ease-in-out var(--pulse-count);
+}
+@keyframes t-skel-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: var(--pulse-min); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-skel-skeleton, .t-skel-content {
+    transition: none !important;
+  }
+  .t-skel-skeleton.is-pulsing > * { animation: none !important; }
+}
+
+/* A small, extruded courtyard model; no image or WebGL download is required. */
+.experience-stage.t-skel { --reveal-blur: 0px; }
+.scene-loader {
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 110px var(--page-inset) 60px;
+  background: #092f35;
+  color: #fbf3de;
+  visibility: visible;
+  transition:
+    opacity var(--reveal-dur) var(--reveal-ease),
+    filter var(--reveal-dur) var(--reveal-ease),
+    visibility 0s;
+}
+.t-skel.is-revealed .scene-loader {
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity var(--reveal-dur) var(--reveal-ease),
+    filter var(--reveal-dur) var(--reveal-ease),
+    visibility 0s var(--reveal-dur);
+}
+.scene-loader-inner { text-align: center; width: 100%; max-width: 520px; }
+.loader-model { width: 220px; height: 232px; margin: 0 auto 26px; }
+.loader-tower { display: block; width: 100%; height: 100%; overflow: visible; }
+
+/*
+ * One 4.2s cycle, staggered by --i so the build reads bottom to top:
+ *   ground plate → four storeys (edges trace, then plaster settles) →
+ *   roof drops → solar panels slide in → planting sprouts → hold →
+ *   the model evaporates in the same order and rebuilds.
+ * Every element is hidden for the last 26% of its own cycle (1.3s), longer
+ * than the largest stagger (~1.26s), so a rebuild always starts on an
+ * empty plate instead of overlapping the previous tower.
+ * Base styles are the finished tower, so a crossfade, reduced motion,
+ * Motion off, or the "rendering" phase all show a complete building.
+ */
+.loader-tower { --cycle: 5s; --step: 0.2s; --ease-out: cubic-bezier(0.22, 1, 0.36, 1); }
+.lm-shadow { fill: #04191c; opacity: 0.45; }
+.lm-face { stroke: #2b3b32; stroke-width: 0.6; stroke-linejoin: round; }
+.lm-window { fill: #3e6466; transition: fill 260ms ease-out; }
+.lm-edge { fill: none; stroke: #f3ddb1; stroke-width: 0.9; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; opacity: 0; }
+.lm-plant, .lm-panel, .lm-ripple { transform-box: fill-box; }
+.lm-plant { transform-origin: 50% 100%; }
+.lm-ripple { transform-origin: center; opacity: 0; }
+
+.lm { animation: lm-rise var(--cycle) var(--ease-out) calc(var(--i) * var(--step)) infinite both; }
+.lm-storey .lm-edge { animation: lm-trace var(--cycle) linear calc(var(--i) * var(--step) - 0.12s) infinite both; }
+.lm-storey .lm-face { animation: lm-settle var(--cycle) var(--ease-out) calc(var(--i) * var(--step)) infinite both; }
+.lm-storey { animation: none; }
+.lm-roof { animation-name: lm-drop; }
+.lm-solar { animation: none; }
+.lm-panel { animation: lm-slide var(--cycle) var(--ease-out) calc(var(--i, 5.6) * var(--step) + var(--k) * 70ms) infinite both; --i: 5.6; }
+/* Each plant sprouts as its own storey lands, and leaves with it. */
+.lm-plant { animation: lm-sprout var(--cycle) var(--ease-out) calc(var(--d) * 1s) infinite both; }
+.lm-ripple { animation: lm-ripple 2.1s ease-out 0.6s infinite; }
+
+@keyframes lm-rise {
+  0% { opacity: 0; transform: translateY(10px); }
+  10% { opacity: 1; transform: none; }
+  64% { opacity: 1; transform: none; }
+  74%, 100% { opacity: 0; transform: translateY(-4px); }
+}
+@keyframes lm-trace {
+  0% { opacity: 1; stroke-dashoffset: 1; }
+  7% { opacity: 1; stroke-dashoffset: 0; }
+  16% { opacity: 0.28; stroke-dashoffset: 0; }
+  64% { opacity: 0.28; stroke-dashoffset: 0; }
+  72%, 100% { opacity: 0; stroke-dashoffset: 0; }
+}
+@keyframes lm-settle {
+  0%, 4% { opacity: 0; transform: translateY(-12px); }
+  14% { opacity: 1; transform: none; }
+  64% { opacity: 1; transform: none; }
+  74%, 100% { opacity: 0; transform: translateY(-4px); }
+}
+@keyframes lm-drop {
+  0% { opacity: 0; transform: translateY(-26px); }
+  9% { opacity: 1; transform: translateY(1.5px); }
+  13% { transform: none; }
+  64% { opacity: 1; transform: none; }
+  74%, 100% { opacity: 0; transform: translateY(-4px); }
+}
+@keyframes lm-slide {
+  0% { opacity: 0; transform: translate(-7px, -4px); }
+  10% { opacity: 1; transform: none; }
+  64% { opacity: 1; transform: none; }
+  72%, 100% { opacity: 0; }
+}
+@keyframes lm-sprout {
+  0% { opacity: 0; transform: scale(0); }
+  9% { opacity: 1; transform: scale(1.12); }
+  14% { transform: scale(1); }
+  64% { opacity: 1; transform: scale(1); }
+  72%, 100% { opacity: 0; transform: scale(0.6); }
+}
+@keyframes lm-ripple {
+  0% { opacity: 0.7; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+
+/* Preparing the first view: the build is done, so finish it and switch the lights on. */
+.scene-loader[data-phase="rendering"] .lm,
+.scene-loader[data-phase="rendering"] .lm-face,
+.scene-loader[data-phase="rendering"] .lm-panel,
+.scene-loader[data-phase="rendering"] .lm-plant { animation: none; }
+.scene-loader[data-phase="rendering"] .lm-edge { animation: none; opacity: 0; }
+.scene-loader[data-phase="rendering"] .lm-window { fill: #ffe7a6; transition-delay: calc(var(--w) * 30ms); }
+.scene-loader[data-phase="rendering"] .loader-tower { animation: lm-glow 900ms ease-out both; }
+@keyframes lm-glow {
+  from { filter: none; }
+  to { filter: drop-shadow(0 0 14px rgba(255, 214, 140, 0.28)); }
+}
+
+.scene-loader-eyebrow { font: 400 0.6rem/1.6 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #b0c6be; margin: 0 0 12px; }
+.scene-loader-title { font: 400 clamp(2.3rem, 4vw, 3.6rem)/1.1 var(--font-serif); letter-spacing: -0.03em; margin: 0 0 16px; color: #fbf3de; }
+.scene-loader-status { font: 400 0.75rem/1.7 var(--font-body); color: #b0c6be; margin: 0; min-height: 1.7em; }
+.scene-loader-skip { display: inline-flex; align-items: center; gap: 18px; min-height: 44px; margin-top: 32px; padding: 8px 0; border: 0; border-bottom: 1px solid #b0c6be55; background: transparent; color: #e3c58e; font: 400 0.7rem/1.5 var(--font-body); cursor: pointer; }
+.scene-loader-skip:hover { color: #fbf3de; border-bottom-color: #fbf3de; }
+.scene-loader[aria-hidden="true"] .loader-tower *,
+.scene-loader[aria-hidden="true"] .loader-tower { animation: none !important; }
+.experience[data-scene-state="loading"] { height: 100svh; }
+.experience[data-scene-state="loading"] .experience-stage { min-height: 0; }
+.experience[data-scene-state="loading"] .experience-visual { visibility: hidden; }
+.experience[data-scene-state="loading"] .spatial-fallback-content { display: none; }
+.experience[data-scene-state="fallback"] .experience-copy { left: var(--page-inset); right: var(--page-inset); width: min(720px, calc(100% - var(--page-inset) * 2)); top: 24%; bottom: auto; }
+.scene-fallback-note { font: 400 0.72rem/1.7 var(--font-body); color: #b0c6be; margin: 24px 0 0; max-width: 380px; }
+/* The early guard must work even when a client chunk prevents hydration. */
+html[data-scene-fallback] .experience { height: auto; }
+html[data-scene-fallback] .experience .scene-loader { display: none; }
+html[data-scene-fallback] .experience .experience-visual { visibility: visible; opacity: 1; filter: none; transition: none; }
+html[data-scene-fallback] .experience .spatial-fallback-content { display: block; }
+html[data-scene-fallback] .experience .experience-copy { left: var(--page-inset); right: var(--page-inset); width: min(720px, calc(100% - var(--page-inset) * 2)); top: 24%; bottom: auto; }
+html[data-scene-fallback] .experience .scene-fallback-note[hidden] { display: block; }
+.experience[data-motion="false"] .loader-tower *,
+.experience[data-motion="false"] .loader-tower { animation: none !important; }
+.experience[data-motion="false"] .lm-edge { opacity: 0; }
+.experience[data-motion="false"] .t-skel-content,
+.experience[data-motion="false"] .t-skel-skeleton { transition: none !important; }
+html[data-locale="ko"] .scene-loader-title { font-family: var(--font-body); font-size: clamp(1.75rem, 3vw, 2.65rem); letter-spacing: -0.06em; line-height: 1.4; }
+@media (max-height: 600px) {
+  .scene-loader { padding-top: 85px; padding-bottom: 20px; }
+  .loader-model { width: 150px; height: 158px; margin-bottom: 10px; }
+  .scene-loader-skip { margin-top: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader-tower, .loader-tower * { animation: none !important; transition: none !important; }
+  .lm-edge, .lm-ripple { opacity: 0; }
+}
