@@ -181,3 +181,17 @@ html[data-locale="ko"] .ppc .site-header .lang-btn[data-set="ko"] { color: var(-
 .ppc-send { margin-top: 16px; }
 .ppc-block > p.ppc-more { margin: 26px 0 0; }
 .ppc-more a { font-weight: 700; color: var(--ink); }
+
+.ppc-cta { margin-top: 16px; padding: 18px 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--line); }
+.ppc-card .ppc-cta p { margin: 0; color: var(--ink); }
+.ppc-cta ul { list-style: none; padding: 0; margin: 12px 0 16px; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--ink-soft); }
+.ppc-cta li::before { content: "✓ "; color: var(--ppc-ok); font-weight: 700; }
+.ppc-card .ppc-cta a.ppc-btn { font-weight: 700; }
+
+.ppc-live { margin-top: 28px; max-width: 680px; padding: 16px 18px; border-radius: 12px; background: var(--limestone); border: 1px solid var(--line); font-size: 14px; color: var(--ink-soft); }
+.ppc-live p { margin: 6px 0 0; }
+.ppc-live .ppc-live-head { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; color: var(--ink); }
+.ppc-live-head strong { font: 600 12px var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ppc-ok); }
+.ppc-pulse.is-live { background: var(--ppc-ok); animation-name: ppc-pulse-ok; }
+@keyframes ppc-pulse-ok { 0% { box-shadow: 0 0 0 0 rgba(63, 107, 44, 0.5); } 100% { box-shadow: 0 0 0 9px rgba(63, 107, 44, 0); } }
+.ppc-live .ppc-live-note { font-size: 12px; color: var(--mute); margin-top: 10px; }

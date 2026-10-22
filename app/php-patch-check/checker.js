@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { C, CONTACT_EMAIL, DETAIL, ERRORS, FIXED, MAX_BULK, META_LABELS, STATUS } from "./copy";
+import { C, CONTACT_EMAIL, CTA, DETAIL, ERRORS, FIXED, MAX_BULK, META_LABELS, STATS, STATUS } from "./copy";
 
 // The checker runs as a Vercel Function in its own project, because this site is a
 // static export. CORS there only admits digitalnative.vip and local dev.
 const API = "https://php2shell-check.vercel.app/api/check";
+const STATS_API = "https://php2shell-check.vercel.app/api/stats";
 
 const RANK = { vulnerable: 0, eol: 1, "needs-patch-level": 2, hidden: 3, error: 4, "no-signs": 5, "not-php": 6, patched: 7 };
 const TONE = { vulnerable: "bad", eol: "bad", "needs-patch-level": "warn", hidden: "warn", error: "muted", "no-signs": "muted", "not-php": "ok", patched: "ok" };
@@ -50,7 +51,53 @@ function judge(full) {
   return pat >= Number(FIXED[`${maj}.${min}`].split(".")[2]) ? "patched" : "vulnerable";
 }
 
-function ResultCard({ r, compact = false }) {
+const CTA_STATUSES = new Set(["vulnerable", "eol", "needs-patch-level", "hidden", "no-signs", "error"]);
+
+function ResultCta({ r }) {
+  const locale = useLocale();
+  const [copied, setCopied] = useState(false);
+  const status = r.error ? "error" : r.status;
+  const label = r.error ? (ERRORS[r.error] || ERRORS.unreachable)[locale] : STATUS[status][locale];
+  const site = r.finalUrl || r.input;
+  const body = [
+    CTA.intro[locale],
+    "",
+    `${site}`,
+    `${label}${r.php ? ` (PHP ${r.php.full})` : ""}`,
+    r.platforms?.length ? `${META_LABELS.platform[locale]}: ${r.platforms.join(", ")}` : "",
+    r.evidence?.length ? `${CTA.evidence[locale]}: ${r.evidence.join("; ")}` : "",
+  ].filter((line, i) => line || i === 1).join("\n");
+  const resultUrl = `${location.origin}${location.pathname}?site=${encodeURIComponent(r.input)}`;
+
+  return (
+    <div className="ppc-cta">
+      <p><L t={CTA.lead} /></p>
+      <ul>{CTA.points.map((p, i) => <li key={i}><L t={p} /></li>)}</ul>
+      <div className="ppc-row">
+        <a className="ppc-btn is-primary" href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`${CTA.subject[locale]} · ${r.host || r.input}`)}&body=${encodeURIComponent(body)}`}>
+          <L t={CTA.review} />
+        </a>
+        <button
+          type="button"
+          className="ppc-btn is-ghost"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(resultUrl);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1500);
+            } catch {
+              /* clipboard blocked */
+            }
+          }}
+        >
+          <L t={copied ? C.copied : CTA.copyResult} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ResultCard({ r, compact = false, cta = false }) {
   if (r.pending) {
     return (
       <div className="ppc-card is-loading is-compact">
@@ -88,6 +135,10 @@ function ResultCard({ r, compact = false }) {
           {!compact && r.finalUrl && <span><b><L t={META_LABELS.checked} /></b> {r.finalUrl}</span>}
         </p>
       ) : null}
+      {!compact && r.evidence?.length > 0 && (
+        <p className="ppc-meta"><span><b><L t={CTA.evidence} /></b> {r.evidence.join(" · ")}</span></p>
+      )}
+      {cta && CTA_STATUSES.has(status) && <ResultCta r={r} />}
     </article>
   );
 }
@@ -106,6 +157,7 @@ export function SingleCheck() {
     setResult({ pending: true, input: url });
     const r = await runCheck(url.trim());
     setResult(r);
+    window.dispatchEvent(new Event("ppc-checked"));
     setBusy(false);
     const params = new URLSearchParams(location.search);
     params.set("site", url.trim());
@@ -120,6 +172,15 @@ export function SingleCheck() {
     if (full && /^\d+\.\d+\.\d+$/.test(full)) {
       setManual({ full });
       setManualOpen(true);
+      // Count each returning owner once per browser session.
+      try {
+        if (!sessionStorage.getItem(`ppc-owner-${full}`)) {
+          sessionStorage.setItem(`ppc-owner-${full}`, "1");
+          fetch(`${STATS_API}?event=owner&eol=${judge(full) === "eol" ? 1 : 0}`, { method: "POST" }).catch(() => {});
+        }
+      } catch {
+        /* storage blocked; skip the count */
+      }
     } else if (v && ["8.5", "8.4", "8.3", "8.2", "8.1", "8.0", "7", "5"].includes(v)) {
       setManual({ branch: v });
       setManualOpen(true);
@@ -175,7 +236,7 @@ export function SingleCheck() {
             <span className="ppc-spinner" aria-hidden="true" />
             <L t={C.checking} />
           </div>
-        ) : <ResultCard r={result} />)}
+        ) : <ResultCard r={result} cta />)}
       </div>
 
       <details className="ppc-manual" id="ver" open={manualOpen} onToggle={(e) => setManualOpen(e.currentTarget.open)}>
@@ -229,6 +290,7 @@ export function BulkCheck() {
         setResults([...out]);
       }
     }));
+    window.dispatchEvent(new Event("ppc-checked"));
     out.sort((a, b) => RANK[a.error ? "error" : a.status] - RANK[b.error ? "error" : b.status]);
     setResults([...out]);
     setBusy(false);
@@ -394,5 +456,48 @@ export function HelpMail({ children }) {
     <a className="ppc-btn is-primary" href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(C.helpSubject[locale])}`}>
       {children}
     </a>
+  );
+}
+
+export function LiveStats() {
+  const [stats, setStats] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const res = await fetch(STATS_API);
+        if (res.ok && alive) setStats(await res.json());
+      } catch {
+        /* keep the last numbers */
+      }
+    };
+    load();
+    const id = setInterval(load, 30_000);
+    window.addEventListener("ppc-checked", load);
+    return () => {
+      alive = false;
+      clearInterval(id);
+      window.removeEventListener("ppc-checked", load);
+    };
+  }, []);
+
+  if (!stats || !stats.checked) return null;
+  return (
+    <aside className="ppc-live" aria-live="polite">
+      <p className="ppc-live-head">
+        <span className="ppc-pulse is-live" aria-hidden="true" />
+        <strong><L t={STATS.live} /></strong>
+        <span><L t={STATS.checked(stats.checked)} /></span>
+        <span>· <L t={STATS.php(stats.php, stats.checked)} /></span>
+        {stats.eol > 0 && <span>· <L t={STATS.eol(stats.eol)} /></span>}
+        {stats.vulnerable > 0 && <span>· <L t={STATS.vulnerable(stats.vulnerable)} /></span>}
+      </p>
+      {stats.shown > 0 && <p><L t={STATS.shown(stats.eol, stats.shown)} /></p>}
+      {stats.owners > 0 && <p><L t={STATS.owners(stats.ownersEol, stats.owners)} /></p>}
+      {stats.platforms?.length > 0 && (
+        <p><L t={STATS.most} /> {stats.platforms.map((p) => `${p.name} ${p.count}`).join(" · ")}</p>
+      )}
+      <p className="ppc-live-note"><L t={STATS.note} /></p>
+    </aside>
   );
 }

@@ -258,6 +258,38 @@ export const ERRORS = {
   rate_limited: { en: "Too many checks at once. Wait a minute and try again.", ko: "점검 요청이 너무 많습니다. 1분 뒤 다시 시도해 주세요." },
 };
 
+export const CTA = {
+  lead: {
+    en: "Not sure what your site, or your clients' sites, really run? We will check them and tell you exactly where you stand.",
+    ko: "내 사이트나 고객 사이트가 실제로 무엇으로 돌아가는지 모르겠나요? 직접 확인해서 지금 어떤 상태인지 정확히 알려드립니다.",
+  },
+  points: [
+    { en: "Free review", ko: "무료 검토" },
+    { en: "A quote before any work", ko: "작업 전 견적 먼저" },
+    { en: "Full backup before anything changes", ko: "변경 전 전체 백업" },
+  ],
+  review: { en: "Send me a free review →", ko: "무료 검토 요청하기 →" },
+  copyResult: { en: "Copy result link", ko: "결과 링크 복사" },
+  subject: { en: "PHP2Shell: free review", ko: "PHP2Shell: 무료 검토 요청" },
+  intro: {
+    en: "Hi Digital Native, please review this site. Result from your PHP2Shell checker:",
+    ko: "안녕하세요 Digital Native, 이 사이트 검토 부탁드립니다. PHP2Shell 점검 결과:",
+  },
+  evidence: { en: "Signals", ko: "근거" },
+};
+
+export const STATS = {
+  live: { en: "Live", ko: "실시간" },
+  checked: (n) => ({ en: `${n} sites checked today`, ko: `오늘 ${n}개 사이트 점검` }),
+  php: (a, b) => ({ en: `PHP found on ${a} of ${b}`, ko: `${b}개 중 ${a}개에서 PHP 발견` }),
+  eol: (n) => ({ en: `${n} on an end-of-life version`, ko: `${n}개가 지원 종료 버전` }),
+  vulnerable: (n) => ({ en: `${n} still need the update`, ko: `${n}개가 아직 업데이트 필요` }),
+  shown: (a, b) => ({ en: `Of the sites that showed their version, ${a} of ${b} were end-of-life.`, ko: `버전을 드러낸 사이트 ${b}개 중 ${a}개가 지원 종료 버전이었습니다.` }),
+  owners: (a, b) => ({ en: `Owners who looked up their exact version: ${a} of ${b} on end-of-life PHP.`, ko: `정확한 버전을 직접 확인한 운영자 ${b}명 중 ${a}명이 지원 종료 PHP였습니다.` }),
+  most: { en: "Most found:", ko: "가장 많이 발견:" },
+  note: { en: "Anonymous daily totals (UTC). No addresses are stored.", ko: "하루 단위 익명 합계(UTC)입니다. 주소는 저장하지 않습니다." },
+};
+
 export const META_LABELS = {
   platform: { en: "Platform", ko: "플랫폼" },
   checked: { en: "Checked", ko: "점검한 주소" },
