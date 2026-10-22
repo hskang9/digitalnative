@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { C, DETAIL, ERRORS, FIXED, MAX_BULK, META_LABELS, STATUS } from "./copy";
+import { C, CONTACT_EMAIL, DETAIL, ERRORS, FIXED, MAX_BULK, META_LABELS, STATUS } from "./copy";
 
 // The checker runs as a Vercel Function in its own project, because this site is a
 // static export. CORS there only admits digitalnative.vip and local dev.
@@ -199,7 +199,15 @@ export function SingleCheck() {
   );
 }
 
+function summaryLine(r, locale) {
+  const label = r.error ? (ERRORS[r.error] || ERRORS.unreachable)[locale] : STATUS[r.status][locale];
+  const php = r.php ? ` (PHP ${r.php.full})` : "";
+  const platforms = r.platforms?.length ? ` [${r.platforms.join(", ")}]` : "";
+  return `- ${r.host || r.input}: ${label}${php}${platforms}`;
+}
+
 export function BulkCheck() {
+  const locale = useLocale();
   const [text, setText] = useState("");
   const [results, setResults] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -234,12 +242,14 @@ export function BulkCheck() {
           id="ppc-bulk"
           rows={6}
           spellCheck={false}
-          placeholder={"shop.example.com\nexample.org\nold-landing-page.example.net"}
+          placeholder={"clientone.com\nclienttwo.com\nshop.example.com"}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
+        <p className="ppc-fine ppc-hint"><L t={C.bulkHint} /></p>
         <div className="ppc-row">
           <button type="submit" className="ppc-btn is-primary" disabled={busy}><L t={C.bulkBtn} /></button>
+          <span className="ppc-fine"><L t={C.bulkSlow} /></span>
           {list.length > 0 && (
             <span className="ppc-fine">
               {Math.min(list.length, MAX_BULK)} / {MAX_BULK}
@@ -252,6 +262,16 @@ export function BulkCheck() {
         <div className="ppc-bulk-grid" aria-live="polite">
           {results.map((r, i) => <ResultCard key={`${r.input}-${i}`} r={r} compact />)}
         </div>
+      )}
+      {results && !busy && (
+        <a
+          className="ppc-btn is-primary ppc-send"
+          href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(C.bulkSendSubject[locale])}&body=${encodeURIComponent(
+            `${C.bulkSendIntro[locale]}\n\n${results.map((r) => summaryLine(r, locale)).join("\n")}\n`,
+          )}`}
+        >
+          <L t={C.bulkSend} />
+        </a>
       )}
     </>
   );
@@ -363,10 +383,15 @@ export function ShareRow() {
   );
 }
 
+export function PortfolioMail({ children }) {
+  const locale = useLocale();
+  return <a href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(C.bulkMoreSubject[locale])}`}>{children}</a>;
+}
+
 export function HelpMail({ children }) {
   const locale = useLocale();
   return (
-    <a className="ppc-btn is-primary" href={`mailto:contact@digitalnative.vip?subject=${encodeURIComponent(C.helpSubject[locale])}`}>
+    <a className="ppc-btn is-primary" href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(C.helpSubject[locale])}`}>
       {children}
     </a>
   );

@@ -1,6 +1,6 @@
 import LocaleToggle from "../locale-toggle";
 import { ADVISORY_URL, C, CISA_URL } from "./copy";
-import { BulkCheck, HelpMail, InsideCheck, L, ShareRow, SingleCheck } from "./checker";
+import { BulkCheck, HelpMail, InsideCheck, L, PortfolioMail, ShareRow, SingleCheck } from "./checker";
 import "./php-check.css";
 
 export const metadata = {
@@ -42,6 +42,7 @@ export default function PhpPatchCheck() {
           <h1><L t={C.h1} /></h1>
           <p className="ppc-lead"><L t={C.lead} /></p>
           <SingleCheck />
+          <p className="ppc-multi"><a href="#bulk"><L t={C.heroMulti} /></a></p>
         </section>
 
         <section className="ppc-facts" aria-label="PHP2Shell">
@@ -61,11 +62,12 @@ export default function PhpPatchCheck() {
           </div>
         </section>
 
-        <section className="ppc-block" aria-labelledby="ppc-bulk-h">
+        <section className="ppc-block" aria-labelledby="ppc-bulk-h" id="bulk">
           <p className="ppc-eyebrow"><L t={C.bulkEyebrow} /></p>
           <h2 id="ppc-bulk-h"><L t={C.bulkH} /></h2>
           <p><L t={C.bulkP} /></p>
           <BulkCheck />
+          <p className="ppc-fine ppc-more"><L t={C.bulkMore} /> <PortfolioMail><L t={C.bulkMoreLink} /></PortfolioMail></p>
         </section>
 
         <section className="ppc-block" aria-labelledby="ppc-inside-h" id="inside">

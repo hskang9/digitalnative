@@ -174,3 +174,10 @@ html[data-locale="ko"] .ppc .site-header .lang-btn[data-set="ko"] { color: var(-
   .ppc-myths { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ppc-bulk-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 }
+
+.ppc-multi { margin: 14px 0 0; font-weight: 600; font-size: 15px; }
+.ppc-multi a { color: var(--ink-soft); }
+.ppc-hint { margin: 0; }
+.ppc-send { margin-top: 16px; }
+.ppc-block > p.ppc-more { margin: 26px 0 0; }
+.ppc-more a { font-weight: 700; color: var(--ink); }
