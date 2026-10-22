@@ -4,6 +4,7 @@ import "./scene-loader.css";
 import { SCENE_BOOT } from "./scene-boot.mjs";
 
 export const metadata = {
+  metadataBase: new URL("https://digitalnative.vip"),
   title: "Digital Native — AI-native software development firm",
   description:
     "Thoughtfully engineered software, from the first idea to the everyday. An independent practice building and operating AI-native products. Subscriptions from $5,000/month.",
@@ -16,7 +17,14 @@ export const metadata = {
     description:
       "An independent practice building and operating AI-native products. Thoughtfully engineered software, from $5,000/month.",
     type: "website",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-home.png", width: 1200, height: 630, alt: "Digital Native: a garden tower of software rooms" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Digital Native — AI-native software development firm",
+    description:
+      "An independent practice building and operating AI-native products. Thoughtfully engineered software, from $5,000/month.",
+    images: ["/og-home.png"],
   },
 };
 
