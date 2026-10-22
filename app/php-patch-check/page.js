@@ -13,7 +13,13 @@ export const metadata = {
     description: "A critical PHP flaw lets attackers run code on the server without a password. Check a site in seconds.",
     type: "website",
     url: "https://digitalnative.vip/php-patch-check",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-php-patch-check.png", width: 1200, height: 630, alt: "PHP2Shell check by Digital Native" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PHP2Shell check: is your site exposed?",
+    description: "A critical PHP flaw lets attackers run code on the server without a password. Check a site in seconds.",
+    images: ["/og-php-patch-check.png"],
   },
 };
 
