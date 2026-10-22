@@ -972,6 +972,9 @@ function Footer() {
             {social.label}
           </a>
         ))}
+        <a href="/php-patch-check">
+          <T en="PHP2Shell check" ko="PHP2Shell 점검" />
+        </a>
         <a href={`mailto:${CONTACT_EMAIL}`}>
           <T en="Contact" ko="문의" />
         </a>
